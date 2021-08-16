@@ -17,18 +17,18 @@ export class EscrowController {
     return this.escrowService.findAll();
   }
 
-  @Get(':id')
+  @Get('/:id')
   findOne(@Param('id') id: number) {
     console.log('findOne');
     return this.escrowService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/:id')
   update(@Param('id') id: number, @Body() escrowDto: EscrowDto) {
     return this.escrowService.update(id, escrowDto);
   }
 
-  @Delete(':id')
+  @Delete('/:id')
   remove(@Param('id') id: number) {
     return this.escrowService.remove(id);
   }

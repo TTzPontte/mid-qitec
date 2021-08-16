@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TestScheduler } from 'rxjs/testing';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
 import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
@@ -34,9 +35,6 @@ export class EscrowService {
     let escrow = new Escrow();
     Object.assign(escrow, escrowDto);
 
-    console.log('escrow');
-    console.log(escrow);
-
     if (escrow.escrowAccountDestinationList != null) {
       const escrowAccountDestinations = [];
       for (let i = 0; i < escrow.escrowAccountDestinationList.length; i++) {
@@ -57,6 +55,7 @@ export class EscrowService {
       const escrowSigners = [];
       for (let i = 0; i < escrow.escrowSignerList.length; i++) {
         let escrowSigner = new EscrowSigner();
+
         Object.assign(escrowSigner, escrow.escrowSignerList[i]);
 
         escrowSigner = await this.escrowSignerRepository.save(escrowSigner);
@@ -87,8 +86,6 @@ export class EscrowService {
         let escrowAccountManager = new EscrowAccountManager();
         Object.assign(escrowAccountManager, escrow.escrowAccountManagerList[i]);
 
-
-
         if (escrowAccountManager.escrowAccountManagerRepresentativeList) {
 
           const escrowAccountManagerRepresentatives = [];
@@ -115,6 +112,7 @@ export class EscrowService {
       const escrowAccountOwners = [];
       for (let i = 0; i < escrow.escrowAccountOwnerList.length; i++) {
         let escrowAccountOwner = new EscrowAccountOwner();
+
         Object.assign(escrowAccountOwner, escrow.escrowAccountOwnerList[i]);
 
         escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
@@ -124,7 +122,6 @@ export class EscrowService {
       escrow.escrowAccountOwnerList = escrowAccountOwners;
 
     }
-
     escrow = await this.escrowRepository.save(escrow);
     return escrow;
   }
@@ -140,13 +137,16 @@ export class EscrowService {
       .leftJoinAndSelect("escrow.escrowAuditList", "escrowAudit")
       .leftJoinAndSelect("escrow.escrowAccountManagerList", "escrowAccountManager")
       .leftJoinAndSelect("escrow.escrowAccountOwnerList", "escrowAccountOwner")
+      .leftJoinAndSelect("escrowAccountManager.escrowAccountManagerRepresentativeList", "escrowAccountManagerRepresentative")
       .where("escrow.id = :id", { id: id })
       .getOne();
     return escrow;
   }
 
+
+
   async update(id: number, escrowDto: EscrowDto) {
-    const escrow = await this.findOne(id);
+    let escrow = await this.findOne(id);
     Object.assign(escrow, escrowDto);
     return await this.escrowRepository.save(escrow);
   }
@@ -154,5 +154,5 @@ export class EscrowService {
   remove(id: number) {
     return this.escrowRepository.delete(id);
   }
-  
+
 }

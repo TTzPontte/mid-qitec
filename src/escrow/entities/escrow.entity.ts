@@ -11,25 +11,25 @@ export class Escrow {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ name: 'pontte_contract_id', type: 'int8' })
     pontte_contract_id: number;
 
-    @Column()
+    @Column({ type: 'varchar', length: 45 })
     account_branch: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 45 })
     account_number: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 45 })
     financial_institution_code: string;
 
-    @Column()
+    @Column({ type: 'int8' })
     status: number;
 
-    @Column()
+    @Column({ type: 'varchar', length: 45 })
     status_name: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 100 })
     status_reason: string;
 
     @Column()

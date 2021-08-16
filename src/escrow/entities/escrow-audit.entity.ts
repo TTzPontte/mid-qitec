@@ -11,11 +11,11 @@ export class EscrowAudit {
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
     @Column()
-    response_event_time :Date;
-    @Column()
-    response_key: number;
-    @Column()
-    response_status: number;
-    @Column()
-    webhook_type : number;
+    response_event_time: Date;
+    @Column({ type: 'varchar', length: 45 })
+    response_key: string;
+    @Column({ type: 'varchar', length: 100 })
+    response_status: string;
+    @Column({ type: 'varchar', length: 45 })
+    webhook_type: string;
 }

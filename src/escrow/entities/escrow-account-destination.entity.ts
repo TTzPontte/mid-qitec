@@ -9,19 +9,19 @@ export class EscrowAccountDestination {
     @ManyToOne(() => Escrow, escrow => escrow.escrowAccountDestinationList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     account_branch: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     account_digit: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     account_number: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     document_number: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     financial_institutions_code_number: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     name: string;
-    @Column()
+   @Column({ type: 'varchar', length: 45 })
     ted_account_type: string;
 
 
