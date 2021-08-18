@@ -10,12 +10,12 @@ export class EscrowAudit {
     @ManyToOne(() => Escrow, escrow => escrow.escrowAuditList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
-    @Column()
-    response_event_time: Date;
-    @Column({ type: 'varchar', length: 45 })
-    response_key: string;
-    @Column({ type: 'varchar', length: 100 })
-    response_status: string;
-    @Column({ type: 'varchar', length: 45 })
-    webhook_type: string;
+    @Column({ type: 'date', name: 'response_event_time' })
+    responseEventTime: Date;
+    @Column({ type: 'varchar', length: 45, name: 'response_key' })
+    responseKey: string;
+    @Column({ type: 'varchar', length: 100, name: 'response_status' })
+    responseStatus: string;
+    @Column({ type: 'varchar', length: 45, name: 'webhook_type' })
+    webhookType: string;
 }

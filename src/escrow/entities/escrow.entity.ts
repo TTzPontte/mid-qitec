@@ -3,7 +3,7 @@ import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.ent
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Escrow {
@@ -11,32 +11,32 @@ export class Escrow {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: 'pontte_contract_id', type: 'int8' })
-    pontte_contract_id: number;
+    @Column({ name: 'pontte_contract_id', nullable: true })
+    pontteContractId: number;
 
-    @Column({ type: 'varchar', length: 45 })
-    account_branch: string;
+    @Column({ type: 'varchar', length: 45, name: 'account_branch', nullable: true })
+    accountBranch: string;
 
-    @Column({ type: 'varchar', length: 45 })
-    account_number: string;
+    @Column({ type: 'varchar', length: 45, name: 'account_number', nullable: true })
+    accountNumber: string;
 
-    @Column({ type: 'varchar', length: 45 })
-    financial_institution_code: string;
+    @Column({ type: 'varchar', length: 45, name: 'financial_institution_code', nullable: true })
+    financialInstitutionCode: string;
 
-    @Column({ type: 'int8' })
+    @Column({ name: 'status' })
     status: number;
 
-    @Column({ type: 'varchar', length: 45 })
-    status_name: string;
+    @Column({ type: 'varchar', length: 45, name: 'status_name', nullable: true })
+    statusName: string;
 
-    @Column({ type: 'varchar', length: 100 })
-    status_reason: string;
+    @Column({ type: 'varchar', length: 100, name: 'status_reason', nullable: true })
+    statusReason: string;
 
-    @Column()
-    create_date: Date;
+    @Column({ type: 'date', name: 'create_date' })
+    createDate: Date;
 
-    @Column()
-    update_date: Date;
+    @Column({ type: 'date', name: 'update_date', nullable: true })
+    updateDate: Date;
 
     @OneToMany(type => EscrowAccountDestination, escrowAccountDestination => escrowAccountDestination.escrow)
     escrowAccountDestinationList: EscrowAccountDestination[];
@@ -47,10 +47,12 @@ export class Escrow {
     @OneToMany(type => EscrowAudit, escrowAudit => escrowAudit.escrow)
     escrowAuditList: EscrowAudit[];
 
-    @OneToMany(type => EscrowAccountManager, escrowAccountManager => escrowAccountManager.escrow)
-    escrowAccountManagerList: EscrowAccountManager[];
+    @OneToOne(() => EscrowAccountManager)
+    @JoinColumn({ name: "escrow_Account_Manager_id" })
+    escrowAccountManager: EscrowAccountManager;
 
-    @OneToMany(type => EscrowAccountOwner, escrowAccountOwner => escrowAccountOwner.escrow)
-    escrowAccountOwnerList: EscrowAccountOwner[];
+    @OneToOne(() => EscrowAccountOwner)
+    @JoinColumn({ name: "escrow_account_owner_id" })
+    escrowAccountOwner: EscrowAccountOwner;
 
 }

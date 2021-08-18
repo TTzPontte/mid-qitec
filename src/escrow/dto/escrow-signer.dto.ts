@@ -5,5 +5,5 @@ export class EscrowSignerDto {
     id: number;
     escrow: EscrowDto;
     name: string;
-    document_number: string;
+    documentNumber: string;
 }

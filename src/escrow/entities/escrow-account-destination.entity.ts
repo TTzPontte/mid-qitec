@@ -9,20 +9,20 @@ export class EscrowAccountDestination {
     @ManyToOne(() => Escrow, escrow => escrow.escrowAccountDestinationList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
-   @Column({ type: 'varchar', length: 45 })
-    account_branch: string;
-   @Column({ type: 'varchar', length: 45 })
-    account_digit: string;
-   @Column({ type: 'varchar', length: 45 })
-    account_number: string;
-   @Column({ type: 'varchar', length: 45 })
-    document_number: string;
-   @Column({ type: 'varchar', length: 45 })
-    financial_institutions_code_number: string;
-   @Column({ type: 'varchar', length: 45 })
+    @Column({ type: 'varchar', length: 45, name: 'account_branch' })
+    accountBranch: string;
+    @Column({ type: 'varchar', length: 45, name: 'account_digit' })
+    accountDigit: string;
+    @Column({ type: 'varchar', length: 45, name: 'account_number' })
+    accountNumber: string;
+    @Column({ type: 'varchar', length: 45, name: 'document_number' })
+    documentNumber: string;
+    @Column({ type: 'varchar', length: 45, name: 'financial_institutions_code_number' })
+    financialInstitutionsCodeNumber: string;
+    @Column({ type: 'varchar', length: 45, name: 'name' })
     name: string;
-   @Column({ type: 'varchar', length: 45 })
-    ted_account_type: string;
+    @Column({ type: 'varchar', length: 45, name: 'ted_account_type' })
+    tedAccountType: string;
 
 
 }

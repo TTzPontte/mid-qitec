@@ -10,6 +10,7 @@ import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { Repository } from 'typeorm';
 import { EscrowDto } from './dto/escrow.dto';
 import { Escrow } from './entities/escrow.entity';
+import { StatusEnum } from './enum/status';
 
 @Injectable()
 export class EscrowService {
@@ -34,6 +35,14 @@ export class EscrowService {
   async create(escrowDto: EscrowDto) {
     let escrow = new Escrow();
     Object.assign(escrow, escrowDto);
+
+
+    console.log('escrow');
+console.log(escrow);
+// console.log();
+// console.log();
+// console.log();
+
 
     if (escrow.escrowAccountDestinationList != null) {
       const escrowAccountDestinations = [];
@@ -80,48 +89,43 @@ export class EscrowService {
 
     }
 
-    if (escrow.escrowAccountManagerList) {
-      const escrowAccountManagers = [];
-      for (let i = 0; i < escrow.escrowAccountManagerList.length; i++) {
-        let escrowAccountManager = new EscrowAccountManager();
-        Object.assign(escrowAccountManager, escrow.escrowAccountManagerList[i]);
+    if (escrow.escrowAccountManager) {
+      let escrowAccountManager = new EscrowAccountManager();
+      Object.assign(escrowAccountManager, escrow.escrowAccountManager);
 
-        if (escrowAccountManager.escrowAccountManagerRepresentativeList) {
+      if (escrowAccountManager.escrowAccountManagerRepresentativeList) {
 
-          const escrowAccountManagerRepresentatives = [];
-          for (let i = 0; i < escrowAccountManager.escrowAccountManagerRepresentativeList.length; i++) {
-            let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
-            Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.escrowAccountManagerRepresentativeList[i]);
+        const escrowAccountManagerRepresentatives = [];
+        for (let i = 0; i < escrowAccountManager.escrowAccountManagerRepresentativeList.length; i++) {
+          let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
+          Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.escrowAccountManagerRepresentativeList[i]);
 
-            escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
+          escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
 
-            escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
-          }
-          escrowAccountManager.escrowAccountManagerRepresentativeList = escrowAccountManagerRepresentatives;
-
+          escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
         }
+        escrowAccountManager.escrowAccountManagerRepresentativeList = escrowAccountManagerRepresentatives;
 
-        escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
-
-        escrowAccountManagers.push(escrowAccountManager);
       }
-      escrow.escrowAccountManagerList = escrowAccountManagers;
+
+      escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
+
+      escrow.escrowAccountManager = escrowAccountManager;
     }
 
-    if (escrow.escrowAccountOwnerList) {
-      const escrowAccountOwners = [];
-      for (let i = 0; i < escrow.escrowAccountOwnerList.length; i++) {
-        let escrowAccountOwner = new EscrowAccountOwner();
+    if (escrow.escrowAccountOwner) {
+      let escrowAccountOwner = new EscrowAccountOwner();
 
-        Object.assign(escrowAccountOwner, escrow.escrowAccountOwnerList[i]);
+      Object.assign(escrowAccountOwner, escrow.escrowAccountOwner);
 
-        escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
+      escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
 
-        escrowAccountOwners.push(escrowAccountOwner);
-      }
-      escrow.escrowAccountOwnerList = escrowAccountOwners;
+      escrow.escrowAccountOwner = escrowAccountOwner;
 
     }
+
+    escrow.status = StatusEnum.NEW;
+    escrow.createDate = new Date;
     escrow = await this.escrowRepository.save(escrow);
     return escrow;
   }
@@ -143,16 +147,53 @@ export class EscrowService {
     return escrow;
   }
 
-
-
   async update(id: number, escrowDto: EscrowDto) {
     let escrow = await this.findOne(id);
     Object.assign(escrow, escrowDto);
     return await this.escrowRepository.save(escrow);
   }
 
+  async updateEscrow(escrow: Escrow) {
+    return await this.escrowRepository.save(escrow);
+  }
+
   remove(id: number) {
     return this.escrowRepository.delete(id);
+  }
+
+  async updateAccountOwner(accountOwner: EscrowAccountOwner) {
+    await this.escrowAccountOwnerRepository.save(accountOwner);
+  }
+  async updateAccountManager(accountManager: EscrowAccountManager) {
+    await this.escrowAccountManagerRepository.save(accountManager);
+  }
+
+  async updateAccountManagerRepresentative(escrowAccountManagerRepresentative: EscrowAccountManagerRepresentative) {
+    await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
+  }
+
+  async findByStatus(status: number) {
+    return await this.escrowRepository.createQueryBuilder("escrow")
+      .leftJoinAndSelect("escrow.escrowAccountDestinationList", "escrowAccountDestination")
+      .leftJoinAndSelect("escrow.escrowSignerList", "escrowSigner")
+      .leftJoinAndSelect("escrow.escrowAuditList", "escrowAudit")
+      .leftJoinAndSelect("escrow.escrowAccountManager", "escrowAccountManager")
+      .leftJoinAndSelect("escrow.escrowAccountOwner", "escrowAccountOwner")
+      .leftJoinAndSelect("escrowAccountManager.escrowAccountManagerRepresentativeList", "escrowAccountManagerRepresentative")
+      .where("escrow.status = :status", { status })
+      .getOne();
+  }
+
+   async findListByStatus(status: number) {
+    return await this.escrowRepository.createQueryBuilder("escrow")
+      .leftJoinAndSelect("escrow.escrowAccountDestinationList", "escrowAccountDestination")
+      .leftJoinAndSelect("escrow.escrowSignerList", "escrowSigner")
+      .leftJoinAndSelect("escrow.escrowAuditList", "escrowAudit")
+      .leftJoinAndSelect("escrow.escrowAccountManager", "escrowAccountManager")
+      .leftJoinAndSelect("escrow.escrowAccountOwner", "escrowAccountOwner")
+      .leftJoinAndSelect("escrowAccountManager.escrowAccountManagerRepresentativeList", "escrowAccountManagerRepresentative")
+      .where("escrow.status = :status", { status })
+      .getMany();
   }
 
 }

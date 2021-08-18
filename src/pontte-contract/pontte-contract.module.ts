@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { QitechService } from './qitech.service';
-import { QitechController } from './qitech.controller';
+import { PontteContractService } from './pontte-contract.service';
+import { PontteContractController } from './pontte-contract.controller';
+import { QitechService } from 'src/qitech/qitech.service';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
@@ -13,7 +14,14 @@ import { Escrow } from 'src/escrow/entities/escrow.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
-  controllers: [QitechController],
-  providers: [QitechService, EscrowService]
+  controllers: [PontteContractController],
+  providers: [PontteContractService, QitechService, EscrowService]
 })
-export class QitechModule {}
+export class PontteContractModule {
+
+
+
+
+
+  
+}

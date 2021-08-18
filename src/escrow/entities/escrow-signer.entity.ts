@@ -10,8 +10,8 @@ export class EscrowSigner {
     @ManyToOne(() => Escrow, escrow => escrow.escrowSignerList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, name: 'name' })
     name: string;
-    @Column({ type: 'varchar', length: 45 })
-    document_number: string;
+    @Column({ type: 'varchar', length: 45, name: 'document_number' })
+    documentNumber: string;
 }

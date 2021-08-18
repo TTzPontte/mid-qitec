@@ -153,9 +153,13 @@ export class QitechController {
     return qitechResponse.decoded;
   }
 
-  @Get('/createEscrow')
-  public async getPending(): Promise<any>{
-   return  this.qitechService.createEscrowAccount();
-  }
+  // @Get('/createEscrow')
+  // public async getPending(): Promise<any>{
+  //  return  this.qitechService.createEscrowAccount();
+  // }
+  // @Get('/uploadDocument')
+  // public async uploadDocument(): Promise<any>{
+  //  return  this.qitechService.uploadDocument();
+  // }
 
 }
