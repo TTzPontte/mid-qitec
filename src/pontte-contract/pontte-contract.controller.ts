@@ -1,20 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { PontteContractService } from './pontte-contract.service';
-import { CreatePontteContractDto } from './dto/create-pontte-contract.dto';
-import { UpdatePontteContractDto } from './dto/update-pontte-contract.dto';
+
+const fs = require('fs');
+const readline = require('readline');
+const { google } = require('googleapis');
 
 @Controller('pontte-contract')
 export class PontteContractController {
-  constructor(private readonly pontteContractService: PontteContractService) {}
-
-  // @Get()
-  // uploadDocument() {
-  //   this.pontteContractService.uploadDocument();
-  // }
+  constructor(private readonly pontteContractService: PontteContractService) { }
 
   @Get()
-  createAccout() {
-    this.pontteContractService.createEscrowAccount();
+  async createAccout() {
+    // await this.pontteContractService.getFilesByDocument('02108308000180');
+    let data = await this.pontteContractService.downloadFileById('1bZzGgtxBJdZEWA_ZGJyFW27DL7tTADda');
+
+
+    console.log(data['DATA']);
+
+
   }
 
 }

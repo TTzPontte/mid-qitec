@@ -43,7 +43,7 @@ export class QitechService {
   ) { }
 
   public async createAccount(data) {
-
+    
     const QITtech = require('qitech-wrapper');
     let qitech_wrapper = QITtech({
       clientKey: "3fb54232-00c3-44c1-bd99-883f3c50da46",
