@@ -1,66 +1,65 @@
 import { Injectable } from '@nestjs/common';
-import { pairs } from 'rxjs';
 import { StatusEnum } from 'src/escrow/enum/status';
 import { EscrowService } from 'src/escrow/escrow.service';
+import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { QitechService } from 'src/qitech/qitech.service';
+import config from 'src/config/config'
 let dateFormat = require('dateformat');
 const fs = require('fs');
-const readline = require('readline');
-const { google } = require('googleapis');
 
 @Injectable()
 export class PontteContractService {
-  api_key = {
-    key: 'AIzaSyC1CfF4rvVbXqbtKzAMxf188G9EEd7mQB4'
-  }
-
-
-
-  pathDocs = '/opt/pontte/arquivos/teste.pdf'//BUSCAR O DOCUMENTO ESPECIFICO PARA CADA UM
-
 
   constructor(
     private readonly escrowService: EscrowService,
-    private readonly qitechService: QitechService
+    private readonly qitechService: QitechService,
+    private readonly googleDriveService: GoogleDriveService,
   ) { }
 
   async createEscrowAccount() {
-    const escrowPending = await this.escrowService.findByStatus(StatusEnum.NEW);//validar status
+    const listEscrowPending = await this.escrowService.findListByStatus(StatusEnum.NEW);//validar status
     //testar com lista
     let list = [];
-    // listEscrowPending.forEach(escrow => {
-    if (this.validateDocumentOk(escrowPending)) {
 
-      let escrowRequest = {
-        destination_list: this.getDestinationList(escrowPending),
-        account_manager: this.getAccountManagerList(escrowPending),
-        account_owner: this.getAccountOwner(escrowPending)
-      }
+    await Promise.all(listEscrowPending.map(async (escrowPending) => {
 
-      let allowed_User = this.getAllowedUser(escrowPending)//validar se é PJ
+      //upload
+      this.uploadDocument(escrowPending);
 
-      if (allowed_User) {
-        escrowRequest['allowed_User'] = allowed_User;
-      }
+      if (this.validateDocumentOk(escrowPending)) {
 
-      let resp = await this.qitechService.createAccount(escrowRequest);//testar com dados reais
-      //validar response
-      //salvar se deu bom
-      console.log('resp');
-      console.log(resp);
-      let { data } = resp;
+        let escrowRequest = {
+          destination_list: this.getDestinationList(escrowPending),
+          account_manager: this.getAccountManagerList(escrowPending),
+          account_owner: this.getAccountOwner(escrowPending),
+        }
 
-      if (data) {
-        console.log(data);
-        console.log(data);
-        escrowPending.accountBranch = data.account_info.account_branch;
-        escrowPending.accountNumber = data.account_info.account_number;
-        escrowPending.status = StatusEnum.APPROVED;
-        this.escrowService.updateEscrow(escrowPending);
+        let allowed_User = this.getAllowedUser(escrowPending)//validar se é PJ
+
+        if (allowed_User) {
+          escrowRequest['allowed_User'] = allowed_User;
+        }
+
+        let resp = await this.qitechService.createAccount(escrowRequest);//testar com dados reais
+        //validar response
+        //salvar se deu bom
+        console.log('resp');
+        console.log(resp);
+        let { data } = resp;
+
+        if (data) {
+          console.log(data);
+          escrowPending.accountBranch = data.account_info.account_branch;
+          escrowPending.accountNumber = data.account_info.account_number;
+          //digito
+          escrowPending.status = StatusEnum.REVIEW;
+          this.escrowService.updateEscrow(escrowPending);
+        }
+
       }
 
     }
-
+    ))
   }
 
   getDestinationList(escrow) {
@@ -260,7 +259,7 @@ export class PontteContractService {
 
   }
 
-  validateDocumentOk(escrow) {//verificar onde sera chamado
+  validateDocumentOk(escrow) {
 
     let documentOk = true;
 
@@ -286,116 +285,101 @@ export class PontteContractService {
 
   }
 
-  async uploadDocument() {
-    const listEscrowPending = await this.escrowService.findListByStatus(StatusEnum.NEW);//validar status
+  async uploadDocument(escrow) {
+    let docs;
 
-    await Promise.all(listEscrowPending.map(async (escrow) => {
+    if (escrow.escrowAccountOwner.type == "PF") {
+      docs = await this.getFilesByDocument(escrow.escrowAccountOwner.individualDocumentNumber);
+    } else if (escrow.escrowAccountOwner.type == "PJ") {
+      docs = await this.getFilesByDocument(escrow.escrowAccountOwner.companyDocumentNumber);
+    }
 
-      console.log(escrow);
-      let docs = [];
-      if (escrow.escrowAccountOwner.type == "PF") {
-        docs = await this.getFilesByDocument(escrow.escrowAccountOwner.individualDocumentNumber);
-      } else if (escrow.escrowAccountOwner.type == "PJ") {
-        docs = await this.getFilesByDocument(escrow.escrowAccountOwner.companyDocumentNumber);
-      }
-  
+    if (docs) {
       this.uploadDocumentAccountOwner(escrow.escrowAccountOwner, docs);
       this.uploadDocumentAccountManager(escrow.escrowAccountManager, docs);
+    }
 
-
-    }));
-
-
-    // listEscrowPending.forEach(escrow => {
-
-    // console.log(escrow);
-    // let docs = [];
-    // if (escrow.escrowAccountOwner.type == "PF") {
-    //   docs = await this.getFilesByDocument(escrow.escrowAccountOwner.individualDocumentNumber);
-    // } else if (escrow.escrowAccountOwner.type == "PJ") {
-    //   docs = await this.getFilesByDocument(escrow.escrowAccountOwner.companyDocumentNumber);
-    // }
-
-    // this.uploadDocumentAccountOwner(escrow.escrowAccountOwner, docs);
-    // this.uploadDocumentAccountManager(escrow.escrowAccountManager, docs);
-    // });
 
   }
 
   async uploadDocumentAccountOwner(accountOwner, docs) {
     let companyStatuteAttach, proofOfResidenceAttach, documentIdentificationAttach;
-    docs.forEach(element => {
+    await Promise.all(docs.map(async (element) => {
+      // docs.forEach(async element => {
       if (element.name == 'company_statute') {
-        companyStatuteAttach = this.getFileByParendFolderId(element.id);
+        companyStatuteAttach = await this.getFileByParentFolderId(element.id);
+        if (!accountOwner.companyStatuteAttach) accountOwner.companyStatuteAttach = companyStatuteAttach['DATA'];
+        this.escrowService.updateAccountOwner(accountOwner);
       }
       if (element.name == 'proof_of_residence') {
-        proofOfResidenceAttach = this.getFileByParendFolderId(element.id);
+        proofOfResidenceAttach = await this.getFileByParentFolderId(element.id);
+        if (!accountOwner.proofOfResidenceAttach) accountOwner.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
+        this.escrowService.updateAccountOwner(accountOwner);
       }
       if (element.name == 'document_identification') {
-        documentIdentificationAttach = this.getFileByParendFolderId(element.id);
+        documentIdentificationAttach = await this.getFileByParentFolderId(element.id);
+        if (!accountOwner.documentIdentificationAttach) accountOwner.documentIdentificationAttach = documentIdentificationAttach['DATA'];
+        this.escrowService.updateAccountOwner(accountOwner);
       }
-    });
+    }));
 
-    if (!accountOwner.companyStatuteAttach) accountOwner.companyStatuteAttach = companyStatuteAttach;
-    if (!accountOwner.proofOfResidenceAttach) accountOwner.proofOfResidenceAttach = proofOfResidenceAttach;
-    if (!accountOwner.documentIdentificationAttach) accountOwner.documentIdentificationAttach = documentIdentificationAttach;
-    this.escrowService.updateAccountOwner(accountOwner);
   }
-
-  separatedDocs
 
   async uploadDocumentAccountManager(accountManager, docs) {
     let documentIdentificationAttach, proofOfResidenceAttach, companyStatuteAttach, directorsElectionMinute;
-    docs.array.forEach(element => {
-
+    await Promise.all(docs.map(async (element) => {
       if (element.name == 'document_identification') {
-        documentIdentificationAttach = this.getFileByParendFolderId(element.id);
+        documentIdentificationAttach = this.getFileByParentFolderId(element.id);
+        if (!accountManager.documentIdentificationAttach) accountManager.documentIdentificationAttach = documentIdentificationAttach['DATA'];
+        this.escrowService.updateAccountManager(accountManager);
       }
       if (element.name == 'proof_of_residence') {
-        proofOfResidenceAttach = this.getFileByParendFolderId(element.id);
+        proofOfResidenceAttach = this.getFileByParentFolderId(element.id);
+        if (!accountManager.proofOfResidenceAttach) accountManager.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
+        this.escrowService.updateAccountManager(accountManager);
       }
       if (element.name == 'company_statute') {
-        companyStatuteAttach = this.getFileByParendFolderId(element.id);
+        companyStatuteAttach = this.getFileByParentFolderId(element.id);
+        if (!accountManager.companyStatuteAttach) accountManager.companyStatuteAttach = companyStatuteAttach['DATA'];
+        this.escrowService.updateAccountManager(accountManager);
       }
       if (element.name == 'directors_election_minute') {
-        directorsElectionMinute = this.getFileByParendFolderId(element.id);
+        directorsElectionMinute = this.getFileByParentFolderId(element.id);
+        if (!accountManager.directorsElectionMinute) accountManager.directorsElectionMinute = directorsElectionMinute['DATA'];
+        this.escrowService.updateAccountManager(accountManager);
       }
 
-    });
+    }));
 
-    //pf
-    if (accountManager.type == "PF") {
-      if (!accountManager.documentIdentificationAttach) accountManager.documentIdentificationAttach = await this.uploadDocumentQiTech(this.pathDocs);
-      if (!accountManager.proofOfResidenceAttach) accountManager.proofOfResidenceAttach = await this.uploadDocumentQiTech(this.pathDocs);
-    } else if (accountManager.type == "PJ") {
+
+    if (accountManager.type == "PJ") {
       //pj
-      if (!accountManager.companyStatuteAttach) accountManager.companyStatuteAttach = await this.uploadDocumentQiTech(this.pathDocs);
-      if (!accountManager.directorsElectionMinute) accountManager.directorsElectionMinute = await this.uploadDocumentQiTech(this.pathDocs);
       accountManager.escrowAccountManagerRepresentativeList.forEach(accountManagerRepresentative => {
         this.uploadDocumentAccountManagerRepresentative(accountManagerRepresentative);
       })
     }
 
-    this.escrowService.updateAccountManager(accountManager);
   }
 
   async uploadDocumentAccountManagerRepresentative(accountManagerRepresentative) {
     let docs = await this.getFilesByDocument(accountManagerRepresentative.document_identification)
 
     let documentIdentificationAttach, proofOfResidenceAttach;
-    docs.forEach(element => {
-      if (element.name == 'document_identification') {
-        documentIdentificationAttach = this.getFileByParendFolderId(element.id);
-      }
+    if (docs)
+      await Promise.all(docs.map(async (element) => {
+        if (element.name == 'document_identification') {
+          documentIdentificationAttach = await this.getFileByParentFolderId(element.id);
+          if (!accountManagerRepresentative.documentIdentificationAttach) accountManagerRepresentative.documentIdentificationAttach = documentIdentificationAttach['DATA'];
+          this.escrowService.updateAccountManagerRepresentative(accountManagerRepresentative);
+        }
 
-      if (element.name == 'proof_of_residence') {
-        proofOfResidenceAttach = this.getFileByParendFolderId(element.id);
-      }
-    });
+        if (element.name == 'proof_of_residence') {
+          proofOfResidenceAttach = await this.getFileByParentFolderId(element.id);
+          if (!accountManagerRepresentative.proofOfResidenceAttach) accountManagerRepresentative.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
+          this.escrowService.updateAccountManagerRepresentative(accountManagerRepresentative);
+        }
+      }));
 
-    if (!accountManagerRepresentative.documentIdentificationAttach) accountManagerRepresentative.documentIdentificationAttach = documentIdentificationAttach;
-    if (!accountManagerRepresentative.proofOfResidenceAttach) accountManagerRepresentative.proofOfResidenceAttach = proofOfResidenceAttach;
-    this.escrowService.updateAccountManagerRepresentative(accountManagerRepresentative);
   }
 
   async uploadDocumentQiTech(path) {
@@ -403,105 +387,74 @@ export class PontteContractService {
     return document_key;
   }
 
-  async getDrive() {
-
-  }
-
-  async getFilesFromDrive(query): Promise<any> {
-    let credentialRawdata = fs.readFileSync('/opt/pontte/arquivos/vegapontte-c37fda9c7b54.json');
-    let credentials = JSON.parse(credentialRawdata);
-
-    const client = await google.auth.getClient({
-      credentials,
-      scopes: 'https://www.googleapis.com/auth/drive',
-    });
-
-    const drive = await google.drive({ version: 'v3', auth: client, });
-
-    const res = await drive.files.list({
-      pageSize: 1000,
-      includeTeamDriveItems: true,
-      supportsTeamDrives: true,
-      q: query,
-      fields: 'nextPageToken, files(id, name, parents)',
-
-    });
-    return res.data.files;
-  }
-
-  // 02108308000180
   async getFilesByDocument(docNumber) {
-    const folderId = '12prrnSQu4UDoxSaTzMMxkSchUWDJ-5H4';//pasta raiz
 
-    let folders = await this.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${folderId}' in parents`);
-    let id = await folders.map(folder => {
-      let { name, id } = folder;
+    //verificar paginação
+    let folders = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${config.ROOT_FOLDER_ID}' in parents`);
 
-      let documentNumber = name.split('_')
-      documentNumber = documentNumber[0].replace(/[^0-9]+/g, '');
-      if (docNumber == documentNumber) {
-        return id;
+    if (folders) {
+      let id = await folders.map(folder => {
+        let { name, id } = folder;
+
+        let documentNumber = name.split('_')
+        documentNumber = documentNumber[0].replace(/[^0-9]+/g, '');
+        if (docNumber == documentNumber) {
+          return id;
+        }
+      });
+
+      console.log(id);
+      if (id[0] != undefined) {
+        let files = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${id[0]}' in parents`);//lista de pastas dentro da pasta do cpf especifico
+        if (files) return files;
       }
-    });
-    console.log(id);
 
-    return await this.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${id}' in parents`);//lista de pastas dentro da pasta do cpf especifico
+    }
+    return null;
 
   }
 
-  async getFileByParendFolderId(folderId) {
-    const files = await this.getFilesFromDrive(`mimeType!='application/vnd.google-apps.folder' and '${folderId}' in parents`);//arquivo
+  async getFileByParentFolderId(folderId) {
+    const files = await this.googleDriveService.getFilesFromDrive(`mimeType!='application/vnd.google-apps.folder' and '${folderId}' in parents`);//arquivo
 
     if (files.length > 0) {
       let { id } = files[0];
-       return await this.downloadFileById(id);
+
+      let response = await this.googleDriveService.downloadFileById(id);
+
+      if (response['ID']) {
+        response['DATA'] = await this.uploadQiTechAttach(response['ID']);
+      }
+      return response;
     }
   }
 
+  async uploadQiTechAttach(fileId) {
+    const documentKey = await this.uploadDocumentQiTech(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`);//VERIFICAR SE TODOS OS ARQUIVOS SÃO PDF
+    this.deleteFile(fileId);
+    console.log('fileId');
+    console.log(fileId);
 
-  async downloadFileById(fileId) {
-    let credentialRawdata = fs.readFileSync('/opt/pontte/arquivos/vegapontte-c37fda9c7b54.json');
-    let credentials = JSON.parse(credentialRawdata);
-    const returnData = [];
-    const client = await google.auth.getClient({
-      credentials,
-      scopes: 'https://www.googleapis.com/auth/drive',
-    });
+    return documentKey;
+  }
 
-    const drive = await google.drive({ version: 'v3', auth: client, });
+  async deleteFile(fileId) {
+    fs.stat(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`, function (err, stats) {
+      console.log(stats);//here we got all information of file in stats variable
 
-    var dest = fs.createWriteStream(`/opt/${fileId}.pdf`);
+      if (err) {
+        return console.error(err);
+      }
 
-    await drive.files.get(
-      { fileId: fileId, alt: 'media', },
-      { responseType: 'stream' }, (err, res) => {
-        if (err) {
-          returnData.push(["ERR"]);
-          returnData.push("" + err);
-          console.log(err);
-        } else {
-           res.data.pipe(dest);
-          returnData.push("Downloaded");
-        }
+      fs.unlink(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`, function (err) {
+        if (err) return console.log(err);
+        console.log('file deleted successfully');
       });
-      
-      returnData['DATA'] = this.getLocalFile(fileId);
-    return returnData;
+    });
   }
 
-  async getLocalFile(fileId) {
-    const file = await fs.readFileSync(`/opt/${fileId}.pdf`);
-    if(file){
-      const documentKey = await this.uploadDocumentQiTech(file);
-
-      fs.unlink(`/opt/${fileId}.pdf`, function (err){
-        if (err) throw err;
-        console.log('Arquivo deletado!');
-    })
 
 
-      return documentKey;
-    }
-  }
+
 
 }

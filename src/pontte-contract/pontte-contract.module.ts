@@ -1,8 +1,4 @@
 import { Module } from '@nestjs/common';
-import { PontteContractService } from './pontte-contract.service';
-import { PontteContractController } from './pontte-contract.controller';
-import { QitechService } from 'src/qitech/qitech.service';
-import { EscrowService } from 'src/escrow/escrow.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
@@ -11,17 +7,17 @@ import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.ent
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { EscrowService } from 'src/escrow/escrow.service';
+import { GoogleDriveService } from 'src/google-drive/google-drive.service';
+import { QitechService } from 'src/qitech/qitech.service';
+import { PontteContractController } from './pontte-contract.controller';
+import { PontteContractService } from './pontte-contract.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
   controllers: [PontteContractController],
-  providers: [PontteContractService, QitechService, EscrowService]
+  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService]
 })
 export class PontteContractModule {
 
-
-
-
-
-  
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TestScheduler } from 'rxjs/testing';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
 import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
@@ -36,21 +35,16 @@ export class EscrowService {
     let escrow = new Escrow();
     Object.assign(escrow, escrowDto);
 
-
     console.log('escrow');
-console.log(escrow);
-// console.log();
-// console.log();
-// console.log();
-
+    console.log(escrow);
 
     if (escrow.escrowAccountDestinationList != null) {
       const escrowAccountDestinations = [];
       for (let i = 0; i < escrow.escrowAccountDestinationList.length; i++) {
+
         let escrowAccountDestination = new EscrowAccountDestination();
         Object.assign(escrowAccountDestination, escrow.escrowAccountDestinationList[i]);
-        console.log('escrowAccountDestination');
-        console.log(escrowAccountDestination);
+
         escrowAccountDestination = await this.escrowAccountDestinationRepository.save(escrowAccountDestination);
 
         escrowAccountDestinations.push(escrowAccountDestination);
@@ -115,7 +109,7 @@ console.log(escrow);
 
     if (escrow.escrowAccountOwner) {
       let escrowAccountOwner = new EscrowAccountOwner();
-
+      
       Object.assign(escrowAccountOwner, escrow.escrowAccountOwner);
 
       escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
@@ -184,7 +178,7 @@ console.log(escrow);
       .getOne();
   }
 
-   async findListByStatus(status: number) {
+  async findListByStatus(status: number) {
     return await this.escrowRepository.createQueryBuilder("escrow")
       .leftJoinAndSelect("escrow.escrowAccountDestinationList", "escrowAccountDestination")
       .leftJoinAndSelect("escrow.escrowSignerList", "escrowSigner")

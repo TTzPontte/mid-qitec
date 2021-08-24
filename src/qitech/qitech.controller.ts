@@ -1,5 +1,4 @@
-import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
-import { QitechDto } from './dto/qitech.dto';
+import { Controller, Get } from '@nestjs/common';
 import { QitechService } from './qitech.service';
 
 @Controller('qitech')

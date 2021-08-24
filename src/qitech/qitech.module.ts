@@ -10,10 +10,12 @@ import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.ent
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { GoogleDriveService } from 'src/google-drive/google-drive.service';
+import { PontteContractService } from 'src/pontte-contract/pontte-contract.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
   controllers: [QitechController],
-  providers: [QitechService, EscrowService]
+  providers: [QitechService, EscrowService, GoogleDriveService, PontteContractService]
 })
 export class QitechModule {}
