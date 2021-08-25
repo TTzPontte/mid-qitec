@@ -391,7 +391,7 @@ export class PontteContractService {
     do {
       resp = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${config.ROOT_FOLDER_ID}' in parents`, pageToken);
       if (resp.files) {
-        pageToken = resp.token;
+        pageToken = resp.nextPageToken;
         id = await resp.files.map(folder => {
           let { name, id } = folder;
 
@@ -402,25 +402,25 @@ export class PontteContractService {
           }
         });
       }
-      if (!resp.token) break;
+      if (!resp.nextPageToken) break;
 
     } while (id[0] == undefined)
 
     console.log(id);
     if (id[0] != undefined) {
       pageToken = null;
-      let files = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${id[0]}' in parents`, pageToken);//lista de pastas dentro da pasta do cpf especifico
-      if (files) return files.files;
+      let data = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${id[0]}' in parents`, pageToken);//lista de pastas dentro da pasta do cpf especifico
+      if (data) return data.files;
     }
 
   }
 
 
   async getFileByParentFolderId(folderId) {
-    const files = await this.googleDriveService.getFilesFromDrive(`mimeType!='application/vnd.google-apps.folder' and '${folderId}' in parents`, null);//arquivo
+    const data = await this.googleDriveService.getFilesFromDrive(`mimeType!='application/vnd.google-apps.folder' and '${folderId}' in parents`, null);//arquivo
 
-    if (files.files.length > 0) {
-      let { id } = files.files[0];
+    if (data.files.length > 0) {
+      let { id } = data.files[0];
 
       let response = await this.googleDriveService.downloadFileById(id);
 

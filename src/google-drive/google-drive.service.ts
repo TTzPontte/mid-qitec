@@ -31,13 +31,15 @@ export class GoogleDriveService {
     console.log(res);
 
     if (res){
+
+      return res.data;
       let resp = {
         files: res.data.files,
         token: res.data.nextPageToken
       }
       return resp;
     }
-      return res.data.files;
+      return null;
   }
 
   async downloadFileById(fileId) {
