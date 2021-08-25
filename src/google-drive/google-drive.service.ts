@@ -8,7 +8,7 @@ export class GoogleDriveService {
 
   CREDENTIAL_RAW_DATA = fs.readFileSync(config.GOOGLE_CREDENTIAL_RAW_DATA);
 
-  async getFilesFromDrive(query): Promise<any> {
+  async getFilesFromDrive(query, nextPageToken): Promise<any> {
     let credentials = JSON.parse(this.CREDENTIAL_RAW_DATA);
 
     const client = await google.auth.getClient({
@@ -19,7 +19,8 @@ export class GoogleDriveService {
     const drive = await google.drive({ version: 'v3', auth: client, });
 
     const res = await drive.files.list({
-      pageSize: 1000,
+      pageToken: nextPageToken,
+      pageSize: 1,
       includeTeamDriveItems: true,
       supportsTeamDrives: true,
       q: query,
@@ -27,10 +28,15 @@ export class GoogleDriveService {
 
     });
 
-    //verificar paginação
     console.log(res);
 
-    if (res)
+    if (res){
+      let resp = {
+        files: res.data.files,
+        token: res.data.nextPageToken
+      }
+      return resp;
+    }
       return res.data.files;
   }
 
