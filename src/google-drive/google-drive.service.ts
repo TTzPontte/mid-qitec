@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 const { google } = require('googleapis');
 const fs = require('fs');
-import config from 'src/config/config'
 
 @Injectable()
 export class GoogleDriveService {
+  constructor(private readonly configService: ConfigService) { }
 
-  CREDENTIAL_RAW_DATA = fs.readFileSync(config.GOOGLE_CREDENTIAL_RAW_DATA);
-
+  CREDENTIAL_RAW_DATA = fs.readFileSync(this.configService.get('config.GOOGLE_CREDENTIAL_RAW_DATA'));
+  
   async getFilesFromDrive(query, nextPageToken): Promise<any> {
     let credentials = JSON.parse(this.CREDENTIAL_RAW_DATA);
-
     const client = await google.auth.getClient({
       credentials,
-      scopes: config.GOOGLE_SCOPE,
+      scopes: this.configService.get('config.GOOGLE_SCOPE'),
     });
 
     const drive = await google.drive({ version: 'v3', auth: client, });
@@ -30,16 +30,10 @@ export class GoogleDriveService {
 
     console.log(res);
 
-    if (res){
-
+    if (res) {
       return res.data;
-      let resp = {
-        files: res.data.files,
-        token: res.data.nextPageToken
-      }
-      return resp;
     }
-      return null;
+    return null;
   }
 
   async downloadFileById(fileId) {
@@ -47,18 +41,18 @@ export class GoogleDriveService {
     const returnData = [];
     const client = await google.auth.getClient({
       credentials,
-      scopes: config.GOOGLE_SCOPE,
+      scopes: this.configService.get('config.GOOGLE_SCOPE'),
     });
 
     const drive = await google.drive({ version: 'v3', auth: client, });
-
-    var dest = fs.createWriteStream(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`);
+    
+    var dest = fs.createWriteStream(`${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`);
 
     await drive.files
       .get({ fileId, alt: 'media' }, { responseType: 'stream' })
       .then(async res => {
         return await new Promise((resolve, reject) => {
-          const filePath = `${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`;
+          const filePath = `${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`;
           console.log(`writing to ${filePath}`);
           const dest = fs.createWriteStream(filePath);
           let progress = 0;
@@ -73,7 +67,7 @@ export class GoogleDriveService {
               reject(err);
             })
 
-            .on('data',async d => {
+            .on('data', async d => {
               progress += d.length;
               if (process.stdout.isTTY) {
                 process.stdout.cursorTo(0);

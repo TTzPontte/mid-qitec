@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { StatusEnum } from 'src/escrow/enum/status';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { QitechService } from 'src/qitech/qitech.service';
-import config from 'src/config/config'
 let dateFormat = require('dateformat');
 const fs = require('fs');
 
@@ -14,6 +14,7 @@ export class PontteContractService {
     private readonly escrowService: EscrowService,
     private readonly qitechService: QitechService,
     private readonly googleDriveService: GoogleDriveService,
+    private readonly configService: ConfigService
   ) { }
 
   async createEscrowAccount() {
@@ -389,7 +390,7 @@ export class PontteContractService {
     let pageToken, id, resp = null;
 
     do {
-      resp = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${config.ROOT_FOLDER_ID}' in parents`, pageToken);
+      resp = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${this.configService.get('config.ROOT_FOLDER_ID')}' in parents`, pageToken);
       if (resp.files) {
         pageToken = resp.nextPageToken;
         id = await resp.files.map(folder => {
@@ -432,7 +433,7 @@ export class PontteContractService {
   }
 
   async uploadQiTechAttach(fileId) {
-    const documentKey = await this.uploadDocumentQiTech(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`);//VERIFICAR SE TODOS OS ARQUIVOS SÃO PDF
+    const documentKey = await this.uploadDocumentQiTech(`${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`);//VERIFICAR SE TODOS OS ARQUIVOS SÃO PDF
     this.deleteFile(fileId);
     console.log('fileId');
     console.log(fileId);
@@ -441,14 +442,16 @@ export class PontteContractService {
   }
 
   async deleteFile(fileId) {
-    fs.stat(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`, function (err, stats) {
+    const folder = this.configService.get('config.GOOGLE_DRIVE_FOLDER');
+
+    fs.stat(`${folder}/${fileId}.pdf`, function (err, stats) {
       console.log(stats);//here we got all information of file in stats variable
 
       if (err) {
         return console.error(err);
       }
-
-      fs.unlink(`${config.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`, function (err) {
+      
+      fs.unlink(`${folder}/${fileId}.pdf`, function (err) {
         if (err) return console.log(err);
         console.log('file deleted successfully');
       });

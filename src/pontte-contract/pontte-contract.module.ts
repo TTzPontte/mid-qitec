@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
@@ -16,7 +17,7 @@ import { PontteContractService } from './pontte-contract.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
   controllers: [PontteContractController],
-  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService]
+  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService, ConfigService]
 })
 export class PontteContractModule {
 

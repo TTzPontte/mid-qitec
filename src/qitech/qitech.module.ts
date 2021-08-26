@@ -12,10 +12,11 @@ import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { Escrow } from 'src/escrow/entities/escrow.entity';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { PontteContractService } from 'src/pontte-contract/pontte-contract.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
   controllers: [QitechController],
-  providers: [QitechService, EscrowService, GoogleDriveService, PontteContractService]
+  providers: [QitechService, EscrowService, GoogleDriveService, PontteContractService, ConfigService]
 })
 export class QitechModule {}
