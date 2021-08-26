@@ -23,7 +23,7 @@ export class QitechService {
   ) { }
 
   API_CLIENT_KEY: string = '3fb54232-00c3-44c1-bd99-883f3c50da46';
-  private CLIENT_PRIVATE_KEY = fs.readFileSync('/opt/pontte/arquivos/jwtECDSASHA512.key');
+  private CLIENT_PRIVATE_KEY = fs.readFileSync('./config/jwtECDSASHA512.key');
 
   getDestinationList(escrow) {
     let destination_list = [];
@@ -162,8 +162,8 @@ export class QitechService {
     const QITtech = require('qitech-wrapper');
     let qitech_wrapper = QITtech({
       clientKey: "3fb54232-00c3-44c1-bd99-883f3c50da46",
-      privateKey: "/opt/pontte/arquivos/jwtECDSASHA512.key",
-      publicKey: "/opt/pontte/arquivos/jwtECDSASHA512.key.pub"
+      privateKey: "./config/jwtECDSASHA512.key",
+      publicKey: "./config/jwtECDSASHA512.key.pub"
     });
 
     let qitechResponse: any;
@@ -252,7 +252,7 @@ export class QitechService {
 
   upload = async () => {
     const formData = new FormData();
-    const file = fs.readFileSync('/opt/pontte/arquivos/arquivoTexto.txt');
+    const file = fs.readFileSync('./config/arquivoTexto.txt');
     formData.append("file", file);
 
     const bodyJWT = {

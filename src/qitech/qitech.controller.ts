@@ -13,11 +13,11 @@ export class QitechController {
     const QITtech = require('qitech-wrapper');
     let qitech_wrapper = QITtech({
       clientKey: "3fb54232-00c3-44c1-bd99-883f3c50da46",
-      privateKey: "/opt/pontte/arquivos/jwtECDSASHA512.key",
-      publicKey: "/opt/pontte/arquivos/jwtECDSASHA512.key.pub"
+      privateKey: "./config/jwtECDSASHA512.key",
+      publicKey: "./config/jwtECDSASHA512.key.pub"
     });
 
-    let fileContent = '/opt/pontte/arquivos/teste.pdf';
+    let fileContent = './config/teste.pdf';
     let qitechResponse: any;
 
     try {
@@ -37,8 +37,8 @@ export class QitechController {
     const QITtech = require('qitech-wrapper');
     let qitech_wrapper = QITtech({
       clientKey: "3fb54232-00c3-44c1-bd99-883f3c50da46",
-      privateKey: "/opt/pontte/arquivos/jwtECDSASHA512.key",
-      publicKey: "/opt/pontte/arquivos/jwtECDSASHA512.key.pub"
+      privateKey: "./config/jwtECDSASHA512.key",
+      publicKey: "./config/jwtECDSASHA512.key.pub"
     });
 
     let data = {
