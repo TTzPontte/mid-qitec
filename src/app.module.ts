@@ -13,7 +13,7 @@ import { QitechModule } from "./qitech/qitech.module";
     QitechModule,
     DebtsModule,
     PontteContractModule,
-    GoogleDriveModule,
+    // GoogleDriveModule,
   ],
   controllers: [],
   providers: [],
