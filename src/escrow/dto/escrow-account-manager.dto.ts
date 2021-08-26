@@ -2,32 +2,35 @@ import { EscrowAccountManagerRepresentativeDto } from "src/escrow/dto/escrow-acc
 import { EscrowDto } from "src/escrow/dto/escrow.dto";
 
 export class EscrowAccountManagerDto {
-  id: number;
-  escrow: EscrowDto;
-  type: string;
-  name: string;
-  cnae_code: string;
-  company_document_number: string;
-  company_statute_attach: string;
-  email: string;
-  foundation_date: Date;
-  person_type: string;
-  address_street: string;
-  address_state: string;
-  address_city: string;
-  address_neighborhood: string;
-  address_number: string;
-  address_postal_code: string;
-  address_complement: string;
-  phone_country_code: string;
-  phone_area_code: string;
-  phone_number: string;
-  mother_name: string;
-  birth_date: Date;
-  nationality: string;
-  is_pep: number;
-  individual_document_number: string;
-  document_identification_attach: string;
-  proof_of_residence_attach: string;
-  escrowAccountManagerRepresentativeList: EscrowAccountManagerRepresentativeDto[];
+
+
+    id: number;
+    escrow: EscrowDto;
+    type: string;
+    name: string;
+    cnaeCode: string;
+    companyDocumentNumber: string;
+    companyStatuteAttach: string;
+    email: string;
+    foundationDate: Date;
+    personType: string;
+    addressStreet: string;
+    addressState: string;
+    addressCity: string;
+    addressNeighborhood: string;
+    addressNumber: string;
+    addressPostalCode: string;
+    addressComplement: string;
+    phoneCountryCode: string;
+    phoneAreaCode: string;
+    phoneNumber: string;
+    motherName: string;
+    birthDate: Date;
+    nationality: string;
+    tradingName: string;
+    isPep: number;
+    individualDocumentNumber: string;
+    documentIdentificationAttach: string;
+    proofOfResidenceAttach: string;
+    escrowAccountManagerRepresentativeList: EscrowAccountManagerRepresentativeDto[];
 }

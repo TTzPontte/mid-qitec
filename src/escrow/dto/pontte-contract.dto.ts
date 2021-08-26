@@ -1,3 +1,3 @@
 export class PontteContractDto {
-  id: number;
+    id: number;
 }

@@ -6,16 +6,18 @@ import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager
 import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.entity';
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
+import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
-import { PontteContractService } from 'src/pontte-contract/pontte-contract.service';
 import { QitechService } from 'src/qitech/qitech.service';
-import { Escrow } from './entities/escrow.entity';
-import { EscrowController } from './escrow.controller';
-import { EscrowService } from './escrow.service';
+import { PontteContractController } from './pontte-contract.controller';
+import { PontteContractService } from './pontte-contract.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner]),GoogleDriveService],
-  controllers: [EscrowController],
+  imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner])],
+  controllers: [PontteContractController],
   providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService]
 })
-export class EscrowModule { }
+export class PontteContractModule {
+
+}
