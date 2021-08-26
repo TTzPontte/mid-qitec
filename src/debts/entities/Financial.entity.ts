@@ -1,90 +1,76 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DebtEntity } from "./debt.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { DebtEntity } from "./Debt.entity";
 
 @Entity("financial", { schema: "pontte_escrow" })
 export class FinancialEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "amount", nullable: true })
+  @Column()
   amount: number | null;
 
-  @Column("varchar", {
-    name: "credit_operation_type",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "credit_operation_type" })
   creditOperationType: string | null;
 
-  @Column("varchar", { name: "issue_date", nullable: true, length: 255 })
+  @Column({ name: "issue_date" })
   issueDate: string | null;
 
-  @Column("varchar", { name: "disbursement_date", nullable: true, length: 255 })
+  @Column({ name: "disbursement_date" })
   disbursementDate: string | null;
 
-  @Column("int", { name: "effective_prefixed_interest_rate", nullable: true })
+  @Column({ name: "effective_prefixed_interest_rate" })
   effectivePrefixedInterestRate: number | null;
 
-  @Column("int", {
-    name: "principal_amortization_month_period",
-    nullable: true,
-  })
+  @Column({ name: "principal_amortization_month_period" })
   principalAmortizationMonthPeriod: number | null;
 
-  @Column("int", { name: "interest_grace_period", nullable: true })
+  @Column({ name: "interest_grace_period" })
   interestGracePeriod: number | null;
 
-  @Column("varchar", { name: "interest_type", nullable: true, length: 255 })
+  @Column({ name: "interest_type" })
   interestType: string | null;
 
-  @Column("varchar", { name: "financial_index", nullable: true, length: 255 })
+  @Column({ name: "financial_index" })
   financialIndex: string | null;
 
-  @Column("int", { name: "number_of_installments", nullable: true })
+  @Column({ name: "number_of_installments" })
   numberOfInstallments: number | null;
 
-  @Column("int", { name: "total_effective_cost", nullable: true })
+  @Column({ name: "total_effective_cost" })
   totalEffectiveCost: number | null;
 
-  @Column("int", { name: "principal_grace_period", nullable: true })
+  @Column({ name: "principal_grace_period" })
   principalGracePeriod: number | null;
 
-  @Column("int", { name: "fine_config_contract_fine_rate", nullable: true })
+  @Column({ name: "fine_config_contract_fine_rate" })
   fineConfigContractFineRate: number | null;
 
-  @Column("varchar", {
-    name: "fine_config_interest_base",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "fine_config_interest_base" })
   fineConfigInterestBase: string | null;
 
-  @Column("int", { name: "fine_confi_monthly_rate", nullable: true })
-  fineConfiMonthlyRate: number | null;
+  @Column({ name: "fine_confi_monthly_rate" })
+  fineConfigMonthlyRate: number | null;
 
-  @Column("varchar", {
-    name: "early_settlement_configuration_type",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "early_settlement_configuration_type" })
   earlySettlementConfigurationType: string | null;
 
-  @Column("int", {
-    name: "early_settlement_configuration_fixed_interest_rate",
-    nullable: true,
-  })
+  @Column({ name: "early_settlement_configuration_fixed_interest_rate" })
   earlySettlementConfigurationFixedInterestRate: number | null;
 
-  @Column("varchar", {
-    name: "prefixed_interest_rate_interest_base",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "prefixed_interest_rate_interest_base" })
   prefixedInterestRateInterestBase: string | null;
 
-  @Column("int", { name: "prefixed_interest_rate_annual_rate", nullable: true })
+  @Column({ name: "prefixed_interest_rate_annual_rate" })
   prefixedInterestRateAnnualRate: number | null;
 
-  @OneToMany(() => DebtEntity, (debt) => debt.financial2)
-  debts: DebtEntity[];
+  @OneToOne(() => DebtEntity, (debt) => debt.financial)
+  @JoinColumn({ name: "debt_id" })
+  debt: DebtEntity;
 }

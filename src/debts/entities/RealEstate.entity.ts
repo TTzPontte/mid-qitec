@@ -1,71 +1,75 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { AddressEntity } from "./Address.entity";
+import { DebtEntity } from "./Debt.entity";
 import { RePossessionCompositionEntity } from "./RePossessionComposition.entity";
 
-@Index("address", ["address"], {})
-@Index("possession_composition", ["possessionComposition"], {})
-@Entity("real_Estate", { schema: "pontte_escrow" })
+@Entity("real_estate", { schema: "pontte_escrow" })
 export class RealEstateEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "address", nullable: true })
-  address: number | null;
+  @Column({ name: "address_city" })
+  addressCity: string | null;
 
-  @Column("varchar", { name: "enrollment_number", nullable: true, length: 255 })
+  @Column({ name: "address_complement" })
+  addressComplement: string | null;
+
+  @Column({ name: "address_neighborhood" })
+  addressNeighborhood: string | null;
+
+  @Column({ name: "address_number" })
+  addressNumber: string | null;
+
+  @Column({ name: "address_postal_code" })
+  addressPostalCode: string | null;
+
+  @Column({ name: "address_state" })
+  addressState: string | null;
+
+  @Column({ name: "address_street" })
+  addressStreet: string | null;
+
+  @Column({ name: "address_country" })
+  addressCountry: string | null;
+
+  @Column({ name: "enrollment_number" })
   enrollmentNumber: string | null;
 
-  @Column("varchar", {
-    name: "municipal_inscription",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "municipal_inscription" })
   municipalInscription: string | null;
 
-  @Column("varchar", {
-    name: "insurance_policy_number",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "insurance_policy_number" })
   insurancePolicyNumber: string | null;
 
-  @Column("varchar", { name: "warranty_type", nullable: true, length: 255 })
+  @Column({ name: "warranty_type" })
   warrantyType: string | null;
 
-  @Column("int", { name: "notary_office_code", nullable: true })
+  @Column({ name: "notary_office_code" })
   notaryOfficeCode: number | null;
 
-  @Column("varchar", { name: "description", nullable: true, length: 255 })
+  @Column()
   description: string | null;
 
-  @Column("varchar", { name: "incra_code", nullable: true, length: 255 })
+  @Column({ name: "incra_code", nullable: true })
   incraCode: string | null;
 
-  @Column("int", { name: "estimated_value", nullable: true })
+  @Column({ name: "estimated_value" })
   estimatedValue: number | null;
 
-  @Column("int", { name: "possession_composition", nullable: true })
-  possessionComposition: number | null;
-
-  @ManyToOne(() => AddressEntity, (address) => address.realEstates, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "address", referencedColumnName: "id" }])
-  address2: AddressEntity;
-
-  @ManyToOne(
+  @OneToMany(
     () => RePossessionCompositionEntity,
-    (rePossessionComposition) => rePossessionComposition.realEstates,
-    { onDelete: "NO ACTION", onUpdate: "NO ACTION" }
+    (possessionComposition) => possessionComposition.realEstate,
+    { cascade: ["insert"] }
   )
-  @JoinColumn([{ name: "possession_composition", referencedColumnName: "id" }])
-  possessionComposition2: RePossessionCompositionEntity;
+  @JoinColumn({ name: "possession_composition" })
+  possessionComposition: RePossessionCompositionEntity[];
+
+  @ManyToOne(() => DebtEntity, (debt) => debt.realEstates)
+  debt: DebtEntity;
 }

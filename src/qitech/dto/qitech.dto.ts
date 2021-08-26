@@ -1,6 +1,4 @@
 export class QitechDto {
-
-    nome: string;
-    descricao: string;
-
+  nome: string;
+  descricao: string;
 }
