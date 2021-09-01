@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const FormData = require('form-data')
 var dateFormat = require('dateformat');
 const QITtech = require('qitech-wrapper');
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class QitechService {
@@ -16,6 +16,14 @@ export class QitechService {
     privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
     publicKey: this.configService.get('config.QITECH_PUBLICKEY')
   });
+
+  public async createDebt(data) {
+      console.log(data)
+   const  qitechResponse = await this.qitech_wrapper.debt.post(data);
+   console.log(qitechResponse.decoded)
+    return qitechResponse.decoded
+
+  }
 
   public async createAccount(data) {
 

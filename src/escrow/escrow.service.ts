@@ -13,7 +13,6 @@ import { StatusEnum } from './enum/status';
 
 @Injectable()
 export class EscrowService {
-
   constructor(
     @InjectRepository(Escrow)
     private escrowRepository: Repository<Escrow>,
@@ -28,8 +27,8 @@ export class EscrowService {
     @InjectRepository(EscrowAccountOwner)
     private escrowAccountOwnerRepository: Repository<EscrowAccountOwner>,
     @InjectRepository(EscrowAccountManagerRepresentative)
-    private escrowAccountManagerRepresentativeRepository: Repository<EscrowAccountManagerRepresentative>,
-  ) { }
+    private escrowAccountManagerRepresentativeRepository: Repository<EscrowAccountManagerRepresentative>
+  ) {}
 
   async create(escrowDto: EscrowDto) {
     let escrow = new Escrow();
@@ -50,11 +49,9 @@ export class EscrowService {
         escrowAccountDestinations.push(escrowAccountDestination);
       }
       escrow.escrowAccountDestinationList = escrowAccountDestinations;
-
     }
 
     if (escrow.escrowSignerList) {
-
       const escrowSigners = [];
       for (let i = 0; i < escrow.escrowSignerList.length; i++) {
         let escrowSigner = new EscrowSigner();
@@ -66,7 +63,6 @@ export class EscrowService {
         escrowSigners.push(escrowSigner);
       }
       escrow.escrowSignerList = escrowSigners;
-
     }
 
     if (escrow.escrowAuditList) {
@@ -80,7 +76,6 @@ export class EscrowService {
         escrowAudits.push(escrowAudit);
       }
       escrow.escrowAuditList = escrowAudits;
-
     }
 
     if (escrow.escrowAccountManager) {
@@ -129,13 +124,23 @@ export class EscrowService {
   }
 
   async findOne(id: number) {
-    const escrow = await this.escrowRepository.createQueryBuilder("escrow")
-      .leftJoinAndSelect("escrow.escrowAccountDestinationList", "escrowAccountDestination")
+    const escrow = await this.escrowRepository
+      .createQueryBuilder("escrow")
+      .leftJoinAndSelect(
+        "escrow.escrowAccountDestinationList",
+        "escrowAccountDestination"
+      )
       .leftJoinAndSelect("escrow.escrowSignerList", "escrowSigner")
       .leftJoinAndSelect("escrow.escrowAuditList", "escrowAudit")
-      .leftJoinAndSelect("escrow.escrowAccountManagerList", "escrowAccountManager")
+      .leftJoinAndSelect(
+        "escrow.escrowAccountManagerList",
+        "escrowAccountManager"
+      )
       .leftJoinAndSelect("escrow.escrowAccountOwnerList", "escrowAccountOwner")
-      .leftJoinAndSelect("escrowAccountManager.escrowAccountManagerRepresentativeList", "escrowAccountManagerRepresentative")
+      .leftJoinAndSelect(
+        "escrowAccountManager.escrowAccountManagerRepresentativeList",
+        "escrowAccountManagerRepresentative"
+      )
       .where("escrow.id = :id", { id: id })
       .getOne();
     return escrow;
