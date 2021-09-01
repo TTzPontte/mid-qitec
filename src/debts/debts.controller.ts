@@ -1,23 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from "@nestjs/common";
 import { DebtsService } from "./debts.service";
-import { CreateDebtDto } from "./dto/create-debt.dto";
-import { UpdateDebtDto } from "./dto/update-debt.dto";
+import { DebtDto } from "./dto/debt.dto";
 
 @Controller("debts")
 export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
   @Post()
-  create(@Body() createDebtDto: CreateDebtDto) {
-    return this.debtsService.create(createDebtDto);
+  create(@Body() debtDto: DebtDto) {
+    return this.debtsService.create(debtDto);
+  }
+
+  @Post("/qitech")
+  async createQitech(@Body() createQitechDto: string) {
+    return this.debtsService.createQitech(createQitechDto);
   }
 
   @Get()
@@ -31,8 +35,8 @@ export class DebtsController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateDebtDto: UpdateDebtDto) {
-    return this.debtsService.update(+id, updateDebtDto);
+  update(@Param("id") id: string, @Body() debtDto: DebtDto) {
+    return this.debtsService.update(+id, debtDto);
   }
 
   @Delete(":id")

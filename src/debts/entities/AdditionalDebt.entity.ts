@@ -1,17 +1,23 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DebtEntity } from "./debt.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { DebtEntity } from "./Debt.entity";
 
 @Entity("additional_debt", { schema: "pontte_escrow" })
 export class AdditionalDebtEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "amount", nullable: true })
+  @Column()
   amount: number | null;
 
-  @Column("varchar", { name: "description", nullable: true, length: 255 })
+  @Column()
   description: string | null;
 
-  @OneToMany(() => DebtEntity, (debt) => debt.debts2)
-  debts: DebtEntity[];
+  @ManyToOne(() => DebtEntity, (debt) => debt.additionalDebts)
+  debt: DebtEntity;
 }

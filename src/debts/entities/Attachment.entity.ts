@@ -1,5 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DebtEntity } from "./debt.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { DebtEntity } from "./Debt.entity";
 
 @Entity("attachment", { schema: "pontte_escrow" })
 export class AttachmentEntity {
@@ -9,6 +15,6 @@ export class AttachmentEntity {
   @Column("varchar", { name: "img", nullable: true, length: 255 })
   img: string | null;
 
-  @OneToMany(() => DebtEntity, (debt) => debt.attachments2)
-  debts: DebtEntity[];
+  @ManyToOne(() => DebtEntity, (debt) => debt.attachments)
+  debt: DebtEntity;
 }
