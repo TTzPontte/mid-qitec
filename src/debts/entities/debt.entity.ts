@@ -1,157 +1,114 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
-  ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { FeeEntity } from "./Fee.entity";
-import { IndividualEntity } from "./Individual.entity";
-import { FinancialEntity } from "./Financial.entity";
-import { InstallmentEntity } from "./Installment.entity";
-import { BankAccountEntity } from "./BankAccount.entity";
-import { AdditionalDebtEntity } from "./AdditionalDebt.entity";
-import { IncomeCompositionEntity } from "./IncomeComposition.entity";
 import { AttachmentEntity } from "./Attachment.entity";
+import { IncomeCompositionEntity } from "./IncomeComposition.entity";
+import { DisbursementAccountEntity } from "./DisbursementAccount.entity";
+import { AdditionalDebtEntity } from "./AdditionalDebt.entity";
+import { RelatedPartiesEntity } from "./RelatedParties.entity";
+import { BorrowerEntity } from "./Borrower.entity";
+import { DestinationAccountEntity } from "./DestinationAccount.entity";
+import { InstallmentEntity } from "./Installment.entity";
+import { FinancialEntity } from "./Financial.entity";
+import { RealEstateEntity } from "./RealEstate.entity";
 
-@Index("attachments", ["attachments"], {})
-@Index("borrower", ["borrower"], {})
-@Index("debts", ["debts"], {})
-@Index("disbursement_account", ["disbursementAccount"], {})
-@Index("external_contract_fees", ["externalContractFees"], {})
-@Index("financial", ["financial"], {})
-@Index("income_composition", ["incomeComposition"], {})
-@Index("installments", ["installments"], {})
-@Index("related_parties", ["relatedParties"], {})
 @Entity("debt", { schema: "pontte_escrow" })
 export class DebtEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int", { name: "external_contract_fees", nullable: true })
-  externalContractFees: number | null;
-
-  @Column("int", { name: "related_parties", nullable: true })
-  relatedParties: number | null;
-
-  @Column("int", { name: "borrower", nullable: true })
-  borrower: number | null;
-
-  @Column("varchar", { name: "real_estate", nullable: true, length: 255 })
-  realEstate: string | null;
-
-  @Column("int", { name: "financial", nullable: true })
-  financial: number | null;
-
-  @Column("varchar", {
-    name: "purchaser_document_number",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "purchaser_document_number" })
   purchaserDocumentNumber: string | null;
 
-  @Column("varchar", {
-    name: "custodian_document_number",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "custodian_document_number" })
   custodianDocumentNumber: string | null;
 
-  @Column("int", { name: "installments", nullable: true })
-  installments: number | null;
-
-  @Column("int", { name: "disbursement_account", nullable: true })
-  disbursementAccount: number | null;
-
-  @Column("varchar", { name: "cci_serial_number", nullable: true, length: 255 })
+  @Column({ name: "cci_serial_number" })
   cciSerialNumber: string | null;
 
-  @Column("int", { name: "real_estate_analisys_expenses", nullable: true })
+  @Column({ name: "real_estate_analisys_expenses" })
   realEstateAnalisysExpenses: number | null;
 
-  @Column("int", { name: "real_estate_registry_expenses", nullable: true })
+  @Column({ name: "real_estate_registry_expenses" })
   realEstateRegistryExpenses: number | null;
 
-  @Column("int", { name: "real_estate_due_balance", nullable: true })
+  @Column({ name: "real_estate_due_balance" })
   realEstateDueBalance: number | null;
 
-  @Column("int", { name: "net_debt_amount", nullable: true })
+  @Column({ name: "net_debt_amount" })
   netDebtAmount: number | null;
 
-  @Column("int", { name: "client_available_balance", nullable: true })
+  @Column({ name: "client_available_balance" })
   clientAvailableBalance: number | null;
 
-  @Column("int", { name: "debts", nullable: true })
-  debts: number | null;
-
-  @Column("int", { name: "income_composition", nullable: true })
-  incomeComposition: number | null;
-
-  @Column("int", { name: "attachments", nullable: true })
-  attachments: number | null;
-
-  @ManyToOne(() => FeeEntity, (fee) => fee.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
+  @OneToOne(() => BorrowerEntity, (borrower) => borrower.debt, {
+    cascade: ["insert"],
   })
-  @JoinColumn([{ name: "external_contract_fees", referencedColumnName: "id" }])
-  externalContractFees2: FeeEntity;
+  borrower: BorrowerEntity;
 
-  @ManyToOne(() => IndividualEntity, (individual) => individual.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
+  @OneToOne(() => FinancialEntity, (financial) => financial.debt, {
+    cascade: ["insert"],
   })
-  @JoinColumn([{ name: "related_parties", referencedColumnName: "id" }])
-  relatedParties2: IndividualEntity;
+  financial: FinancialEntity;
 
-  @ManyToOne(() => IndividualEntity, (individual) => individual.debts2, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "borrower", referencedColumnName: "id" }])
-  borrower2: IndividualEntity;
-
-  @ManyToOne(() => FinancialEntity, (financial) => financial.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "financial", referencedColumnName: "id" }])
-  financial2: FinancialEntity;
-
-  @ManyToOne(() => InstallmentEntity, (installment) => installment.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "installments", referencedColumnName: "id" }])
-  installments2: InstallmentEntity;
-
-  @ManyToOne(() => BankAccountEntity, (bankAccount) => bankAccount.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "disbursement_account", referencedColumnName: "id" }])
-  disbursementAccount2: BankAccountEntity;
-
-  @ManyToOne(() => AdditionalDebtEntity, (additionalDebt) => additionalDebt.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "debts", referencedColumnName: "id" }])
-  debts2: AdditionalDebtEntity;
-
-  @ManyToOne(
-    () => IncomeCompositionEntity,
-    (incomeComposition) => incomeComposition.debts,
-    { onDelete: "NO ACTION", onUpdate: "NO ACTION" }
+  @OneToOne(
+    () => DisbursementAccountEntity,
+    (disbursementAccount) => disbursementAccount.debt,
+    { cascade: ["insert"] }
   )
-  @JoinColumn([{ name: "income_composition", referencedColumnName: "id" }])
-  incomeComposition2: IncomeCompositionEntity;
+  disbursementAccount: DisbursementAccountEntity;
 
-  @ManyToOne(() => AttachmentEntity, (attachment) => attachment.debts, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "attachments", referencedColumnName: "id" }])
-  attachments2: AttachmentEntity;
+  @OneToMany(
+    () => FeeEntity,
+    (externalContractFees) => externalContractFees.debt
+  )
+  @JoinColumn({ name: "external_contract_fees" })
+  externalContractFees: FeeEntity[];
+
+  @OneToMany(() => AttachmentEntity, (attachments) => attachments.debt)
+  attachments: AttachmentEntity[];
+
+  @OneToMany(
+    () => RelatedPartiesEntity,
+    (relatedParties) => relatedParties.debt
+  )
+  @JoinColumn({ name: "related_parties" })
+  relatedParties: RelatedPartiesEntity[];
+
+  @OneToMany(() => InstallmentEntity, (installments) => installments.debt)
+  @JoinColumn()
+  installments: InstallmentEntity[];
+
+  @OneToMany(
+    () => AdditionalDebtEntity,
+    (additionalDebt) => additionalDebt.debt,
+    {
+      cascade: ["insert"],
+    }
+  )
+  @JoinColumn({ name: "additional_debt" })
+  additionalDebts: AdditionalDebtEntity[];
+
+  @OneToMany(
+    () => IncomeCompositionEntity,
+    (incomeComposition) => incomeComposition.debt
+  )
+  @JoinColumn({ name: "income_composition" })
+  incomeComposition: IncomeCompositionEntity[];
+
+  @OneToMany(
+    () => DestinationAccountEntity,
+    (destinationAccount) => destinationAccount.debt
+  )
+  @JoinColumn({ name: "destination_accounts" })
+  destinationAccounts: DestinationAccountEntity[];
+
+  @OneToMany(() => RealEstateEntity, (realEstate) => realEstate.debt)
+  realEstates: RealEstateEntity[];
 }

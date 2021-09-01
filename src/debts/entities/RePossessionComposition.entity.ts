@@ -1,20 +1,27 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { RealEstateEntity } from "./RealEstate.entity";
 
 @Entity("re_possession_composition", { schema: "pontte_escrow" })
 export class RePossessionCompositionEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { name: "name", nullable: true, length: 255 })
+  @Column()
   name: string | null;
 
-  @Column("varchar", { name: "percentage", nullable: true, length: 255 })
+  @Column()
   percentage: string | null;
 
-  @OneToMany(
+  @ManyToOne(
     () => RealEstateEntity,
-    (realEstate) => realEstate.possessionComposition2
+    (realEstate) => realEstate.possessionComposition
   )
-  realEstates: RealEstateEntity[];
+  @JoinColumn({ name: "possession_composition" })
+  realEstate: RealEstateEntity;
 }

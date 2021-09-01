@@ -1,37 +1,35 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DebtEntity } from "./debt.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { DebtEntity } from "./Debt.entity";
 
 @Entity("installment", { schema: "pontte_escrow" })
 export class InstallmentEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", {
-    name: "principal_amortization_amount",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "principal_amortization_amount" })
   principalAmortizationAmount: string | null;
 
-  @Column("varchar", { name: "due_date", nullable: true, length: 255 })
+  @Column({ name: "due_date" })
   dueDate: string | null;
 
-  @Column("varchar", {
-    name: "prefixed_interest_amount",
-    nullable: true,
-    length: 255,
-  })
+  @Column({ name: "prefixed_interest_amount" })
   prefixedInterestAmount: string | null;
 
-  @Column("varchar", { name: "cost_tsa", nullable: true, length: 255 })
+  @Column({ name: "cost_tsa" })
   costTsa: string | null;
 
-  @Column("varchar", { name: "cost_mip", nullable: true, length: 255 })
+  @Column({ name: "cost_mip" })
   costMip: string | null;
 
-  @Column("varchar", { name: "cost_dfi", nullable: true, length: 255 })
+  @Column({ name: "cost_dfi" })
   costDfi: string | null;
 
-  @OneToMany(() => DebtEntity, (debt) => debt.installments2)
-  debts: DebtEntity[];
+  @ManyToOne(() => DebtEntity, (debt) => debt.installments)
+  debt: DebtEntity;
 }

@@ -11,7 +11,7 @@ export class Escrow {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: 'pontte_contract_id', type: 'int8' })
+    @Column({ name: 'pontte_contract_id', type: 'int' })
     pontte_contract_id: number;
 
     @Column({ type: 'varchar', length: 45 })
@@ -23,7 +23,7 @@ export class Escrow {
     @Column({ type: 'varchar', length: 45 })
     financial_institution_code: string;
 
-    @Column({ type: 'int8' })
+    @Column({ type: 'int' })
     status: number;
 
     @Column({ type: 'varchar', length: 45 })

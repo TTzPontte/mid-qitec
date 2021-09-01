@@ -1,20 +1,26 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DebtEntity } from "./debt.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { DebtEntity } from "./Debt.entity";
 
 @Entity("fee", { schema: "pontte_escrow" })
 export class FeeEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("varchar", { name: "fee_type", nullable: true, length: 255 })
+  @Column({ name: "fee_type" })
   feeType: string | null;
 
-  @Column("varchar", { name: "amount", nullable: true, length: 255 })
-  amount: string | null;
-
-  @Column("varchar", { name: "amount_type", nullable: true, length: 255 })
+  @Column({ name: "amount_type" })
   amountType: string | null;
 
-  @OneToMany(() => DebtEntity, (debt) => debt.externalContractFees2)
-  debts: DebtEntity[];
+  @Column()
+  amount: string | null;
+
+  @ManyToOne(() => DebtEntity, (debt) => debt.externalContractFees)
+  debt: DebtEntity;
 }

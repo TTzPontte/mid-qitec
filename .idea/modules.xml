@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/mid-qitec.iml" filepath="$PROJECT_DIR$/.idea/mid-qitec.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Torre_Controle/torre-controle-backend/.idea/torre-controle-backend.iml" filepath="$PROJECT_DIR$/../Torre_Controle/torre-controle-backend/.idea/torre-controle-backend.iml" />
     </modules>
   </component>
 </project>
