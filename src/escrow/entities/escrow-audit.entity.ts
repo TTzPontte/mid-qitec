@@ -7,7 +7,7 @@ export class EscrowAudit {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @ManyToOne(() => Escrow, escrow => escrow.escrowAuditList)
+    @ManyToOne(() => Escrow, escrow => escrow.auditList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
     @Column({ type: 'date', name: 'response_event_time' })

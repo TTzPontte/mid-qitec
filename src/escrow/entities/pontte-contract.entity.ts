@@ -4,4 +4,10 @@ import { Entity, PrimaryGeneratedColumn } from 'typeorm';
 export class PontteContract {
     @PrimaryGeneratedColumn()
     id: number;
+    //documento
+    // nome
+    // valor
+
+    
+
 }

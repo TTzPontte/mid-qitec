@@ -6,8 +6,8 @@ export class EscrowAccountOwner {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @OneToOne(() => Escrow)
-    @JoinColumn({ name: "escrow_id" })
+    @OneToOne(() => Escrow, (escrow: Escrow) => escrow.accountOwner, {
+    })
     escrow: Escrow;
     @Column({ type: 'varchar', length: 2, name: 'type' })
     type: string;

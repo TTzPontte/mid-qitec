@@ -14,6 +14,7 @@ import { RealEstateEntity } from "./entities/RealEstate.entity";
 import { DisbursementAccountEntity } from "./entities/DisbursementAccount.entity";
 import { FinancialEntity } from "./entities/Financial.entity";
 import config from "src/config/config";
+import { StatusEnum } from "src/escrow/enum/status";
 
 const QITtech = require("qitech-wrapper");
 
@@ -88,6 +89,8 @@ export class DebtsService {
 		return returnList;
 	};
 	create = async (debtDto: DebtDto) => {
+		console.log(debtDto);
+
 		let debt = new DebtEntity();
 		debt = Object.assign(debt, debtDto);
 		for (const key of this.relatedKeys) {
@@ -95,7 +98,7 @@ export class DebtsService {
 			const repo = this.relations[key];
 			debt[key] = await this.buildTableData(list, repo);
 		}
-
+		debt.status = StatusEnum.NEW;
 		debt = await this.debtRepository.save(debt);
 		return debt;
 	};
@@ -122,9 +125,24 @@ export class DebtsService {
 		return debt;
 	};
 
+	async findByStatus(status: number) {
+		const relations = [
+			...this.relatedKeys,
+			"borrower",
+			"disbursementAccount",
+			"financial",
+			"realEstates.possessionComposition",
+		];
+		return await this.debtRepository.find({ where: { status }, relations });
+	  }
+
 	update = async (id: number, debtDto: DebtDto) => {
 		return `This action updates a #${id} debt`;
 	};
+
+	async updateDebit(debit: DebtEntity) {
+		return await this.debtRepository.save(debit);
+	  }
 
 	remove = async (id: number) => {
 		return `This action removes a #${id} debt`;

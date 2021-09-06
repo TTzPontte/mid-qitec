@@ -6,7 +6,7 @@ export class EscrowAccountDestination {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @ManyToOne(() => Escrow, escrow => escrow.escrowAccountDestinationList)
+    @ManyToOne(() => Escrow, escrow => escrow.destinationAccounts)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
     @Column({ type: 'varchar', length: 45, name: 'account_branch' })
@@ -21,8 +21,9 @@ export class EscrowAccountDestination {
     financialInstitutionsCodeNumber: string;
     @Column({ type: 'varchar', length: 45, name: 'name' })
     name: string;
-    @Column({ type: 'varchar', length: 45, name: 'ted_account_type' })
+    @Column({ type: 'varchar', length: 45, name: 'ted_account_type', nullable: true})
     tedAccountType: string;
+
 
 
 }

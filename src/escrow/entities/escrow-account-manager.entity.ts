@@ -7,8 +7,8 @@ export class EscrowAccountManager {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @OneToOne(() => Escrow)
-    @JoinColumn({ name: "escrow_id" })
+    @OneToOne(() => Escrow, (escrow: Escrow) => escrow.accountManager, {
+    })
     escrow: Escrow;
     @Column({ type: 'varchar', length: 2, name: 'type' })
     type: string;
@@ -18,7 +18,7 @@ export class EscrowAccountManager {
     cnaeCode: string;
     @Column({ type: 'varchar', length: 14, name: 'company_document_number' })
     companyDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'company_statute_attach' , nullable: true })
+    @Column({ type: 'varchar', length: 45, name: 'company_statute_attach', nullable: true })
     companyStatuteAttach: string;
     @Column({ type: 'varchar', length: 255, name: 'email' })
     email: string;
@@ -56,16 +56,18 @@ export class EscrowAccountManager {
     isPep: boolean;
     @Column({ type: 'varchar', length: 11, name: 'individual_document_number' })
     individualDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach' , nullable: true })
+    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach', nullable: true })
     documentIdentificationAttach: string;
-    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach' , nullable: true })
+    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach', nullable: true })
     proofOfResidenceAttach: string;
     @Column({ type: 'varchar', length: 100, name: 'trading_name' })
     tradingName: string;
-    @Column({ type: 'varchar', length: 45, name: 'directors_election_minute' , nullable: true })
+    @Column({ type: 'varchar', length: 45, name: 'directors_election_minute', nullable: true })
     directorsElectionMinute: string;
 
-    @OneToMany(type => EscrowAccountManagerRepresentative, escrowAccountManagerRepresentative => escrowAccountManagerRepresentative.escrowAccountManager)
-    escrowAccountManagerRepresentativeList: EscrowAccountManagerRepresentative[];
+    @OneToMany(type => EscrowAccountManagerRepresentative, escrowAccountManagerRepresentative => escrowAccountManagerRepresentative.accountManager, {
+        cascade: true,
+    })
+    accountManagerRepresentativeList: EscrowAccountManagerRepresentative[];
 }
 

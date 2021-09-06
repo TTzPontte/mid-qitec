@@ -7,7 +7,7 @@ export class EscrowSigner {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @ManyToOne(() => Escrow, escrow => escrow.escrowSignerList)
+    @ManyToOne(() => Escrow, escrow => escrow.signerList)
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
     @Column({ type: 'varchar', length: 255, name: 'name' })

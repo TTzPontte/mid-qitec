@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DebtsService } from 'src/debts/debts.service';
+import { DebtDto } from 'src/debts/dto/debt.dto';
+import { Escrow } from 'src/escrow/entities/escrow.entity';
 import { StatusEnum } from 'src/escrow/enum/status';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { QitechService } from 'src/qitech/qitech.service';
+import { PonttePayload } from './dto/payload';
 let dateFormat = require('dateformat');
 const fs = require('fs');
 
@@ -14,14 +18,53 @@ export class PontteContractService {
     private readonly escrowService: EscrowService,
     private readonly qitechService: QitechService,
     private readonly googleDriveService: GoogleDriveService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly debtsService: DebtsService
   ) { }
 
-  async createEscrowAccount() {
+  async saveEscrowAndDebit(payload: DebtDto) {
+    //ajustar payload
+    this.debtsService.create(payload);
+
+    let escrow =  await this.escrowService.escrowConverter(payload);
+    this.escrowService.create(escrow);
+    // this.escrowService.escrowConverter(payload);
+  }
+
+  async callQiTech() {
+    //como ligar uma conta escrow a uma solicitação de divida??
+    this.createEscrowAccountQiTech();
+    this.createDebitQiTech();
+  }
+
+  async createDebitQiTech() {
+    //buscar por status
+    const listDebtsPending = await this.debtsService.findByStatus(StatusEnum.NEW);
+    //precisa validar algo?
+
+    await Promise.all(listDebtsPending.map(async (debit) => {
+      // enviar para qitech
+      let resp = await this.qitechService.createDebt(debit);
+
+      let { data } = resp;
+
+      if (data) {
+        //precis salvar algum retorno?
+        //numero cci, ipoc
+        //status
+        console.log(data);
+        debit.status = StatusEnum.REVIEW;
+        this.debtsService.updateDebit(debit);
+      }
+
+    }))
+
+  }
+
+  async createEscrowAccountQiTech() {
     const listEscrowPending = await this.escrowService.findListByStatus(StatusEnum.NEW);//validar status
 
     await Promise.all(listEscrowPending.map(async (escrowPending) => {
-
       //upload
       this.uploadDocument(escrowPending);
 
@@ -450,12 +493,16 @@ export class PontteContractService {
       if (err) {
         return console.error(err);
       }
-      
+
       fs.unlink(`${folder}/${fileId}.pdf`, function (err) {
         if (err) return console.log(err);
         console.log('file deleted successfully');
       });
     });
+  }
+
+  async debit() {
+    this.qitechService.debit({});
   }
 
 

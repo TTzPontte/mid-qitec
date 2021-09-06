@@ -6,9 +6,9 @@ export class EscrowAccountManagerRepresentative {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @ManyToOne(() => EscrowAccountManager, escrowAccountManager => escrowAccountManager.escrowAccountManagerRepresentativeList)
+    @ManyToOne(() => EscrowAccountManager, escrowAccountManager => escrowAccountManager.accountManagerRepresentativeList)
     @JoinColumn({ name: "escrow_account_manager_id" })
-    escrowAccountManager: EscrowAccountManager;
+    accountManager: EscrowAccountManager;
     @Column({ type: 'varchar', length: 20, name: 'person_type' })
     personType: string;
     @Column({ type: 'varchar', length: 100, name: 'name' })

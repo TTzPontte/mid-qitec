@@ -38,21 +38,31 @@ export class Escrow {
     @Column({ type: 'date', name: 'update_date', nullable: true })
     updateDate: Date;
 
-    @OneToMany(type => EscrowAccountDestination, escrowAccountDestination => escrowAccountDestination.escrow)
-    escrowAccountDestinationList: EscrowAccountDestination[];
+    @OneToMany(type => EscrowAccountDestination, escrowAccountDestination => escrowAccountDestination.escrow, {
+        cascade: true,
+    })
+    destinationAccounts: EscrowAccountDestination[];
 
-    @OneToMany(type => EscrowSigner, escrowSigner => escrowSigner.escrow)
-    escrowSignerList: EscrowSigner[];
+    @OneToMany(type => EscrowSigner, escrowSigner => escrowSigner.escrow, {
+        cascade: true,
+    })
+    signerList: EscrowSigner[];
 
-    @OneToMany(type => EscrowAudit, escrowAudit => escrowAudit.escrow)
-    escrowAuditList: EscrowAudit[];
+    @OneToMany(type => EscrowAudit, escrowAudit => escrowAudit.escrow, {
+        cascade: true,
+    })
+    auditList: EscrowAudit[];
 
-    @OneToOne(() => EscrowAccountManager)
-    @JoinColumn({ name: "escrow_Account_Manager_id" })
-    escrowAccountManager: EscrowAccountManager;
+    @OneToOne(() => EscrowAccountManager, (escrowAccountManager: EscrowAccountManager) => escrowAccountManager.escrow, {
+        cascade: true,
+    })
+    @JoinColumn({ name: "escrow_account_manager_id" })
+    accountManager: EscrowAccountManager;
 
-    @OneToOne(() => EscrowAccountOwner)
+    @OneToOne(() => EscrowAccountOwner, (escrowAccountOwner: EscrowAccountOwner) => escrowAccountOwner.escrow, {
+        cascade: true,
+    })
     @JoinColumn({ name: "escrow_account_owner_id" })
-    escrowAccountOwner: EscrowAccountOwner;
+    accountOwner: EscrowAccountOwner;
 
 }

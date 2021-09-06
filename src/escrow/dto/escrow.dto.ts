@@ -16,10 +16,10 @@ export class EscrowDto {
     statusReason: string;
     createDate: Date;
     updateDate: Date;
-    escrowAccountDestinations: EscrowAccountDestinationDto[];
-    escrowSignerList: EscrowSignerDto[];
-    escrowAuditList: EscrowAuditDto[];
-    escrowAccountManager: EscrowAccountManagerDto;
-    escrowAccountOwner: EscrowAccountOwnerDto;
+    destinationAccounts: EscrowAccountDestinationDto[];
+    signerList: EscrowSignerDto[];
+    auditList: EscrowAuditDto[];
+    accountManager: EscrowAccountManagerDto;
+    accountOwner: EscrowAccountOwnerDto;
 
 }

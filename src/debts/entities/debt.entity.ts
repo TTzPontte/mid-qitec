@@ -23,6 +23,9 @@ export class DebtEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'status' })
+  status: number;
+
   @Column({ name: "purchaser_document_number" })
   purchaserDocumentNumber: string | null;
 

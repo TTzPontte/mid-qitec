@@ -32,5 +32,5 @@ export class EscrowAccountManagerDto {
     individualDocumentNumber: string;
     documentIdentificationAttach: string;
     proofOfResidenceAttach: string;
-    escrowAccountManagerRepresentativeList: EscrowAccountManagerRepresentativeDto[];
+    accountManagerRepresentativeList: EscrowAccountManagerRepresentativeDto[];
 }

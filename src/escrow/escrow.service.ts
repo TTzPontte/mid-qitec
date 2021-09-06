@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DebtDto } from 'src/debts/dto/debt.dto';
 import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
 import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
@@ -7,9 +8,12 @@ import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.ent
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { Repository } from 'typeorm';
+import { EscrowAccountManagerDto } from './dto/escrow-account-manager.dto';
+import { EscrowAccountOwnerDto } from './dto/escrow-account-owner.dto';
 import { EscrowDto } from './dto/escrow.dto';
 import { Escrow } from './entities/escrow.entity';
 import { StatusEnum } from './enum/status';
+let dateFormat = require('dateformat');
 
 @Injectable()
 export class EscrowService {
@@ -28,7 +32,8 @@ export class EscrowService {
     private escrowAccountOwnerRepository: Repository<EscrowAccountOwner>,
     @InjectRepository(EscrowAccountManagerRepresentative)
     private escrowAccountManagerRepresentativeRepository: Repository<EscrowAccountManagerRepresentative>
-  ) {}
+  ) {
+  }
 
   async create(escrowDto: EscrowDto) {
     let escrow = new Escrow();
@@ -37,81 +42,82 @@ export class EscrowService {
     console.log('escrow');
     console.log(escrow);
 
-    if (escrow.escrowAccountDestinationList != null) {
-      const escrowAccountDestinations = [];
-      for (let i = 0; i < escrow.escrowAccountDestinationList.length; i++) {
 
-        let escrowAccountDestination = new EscrowAccountDestination();
-        Object.assign(escrowAccountDestination, escrow.escrowAccountDestinationList[i]);
+    // if (escrow.destinationAccounts != null) {
+    //   const escrowAccountDestinations = [];
+    //   for (let i = 0; i < escrow.destinationAccounts.length; i++) {
 
-        escrowAccountDestination = await this.escrowAccountDestinationRepository.save(escrowAccountDestination);
+    //     let escrowAccountDestination = new EscrowAccountDestination();
+    //     Object.assign(escrowAccountDestination, escrow.destinationAccounts[i]);
 
-        escrowAccountDestinations.push(escrowAccountDestination);
-      }
-      escrow.escrowAccountDestinationList = escrowAccountDestinations;
-    }
+    //     escrowAccountDestination = await this.escrowAccountDestinationRepository.save(escrowAccountDestination);
 
-    if (escrow.escrowSignerList) {
-      const escrowSigners = [];
-      for (let i = 0; i < escrow.escrowSignerList.length; i++) {
-        let escrowSigner = new EscrowSigner();
+    //     escrowAccountDestinations.push(escrowAccountDestination);
+    //   }
+    //   escrow.destinationAccounts = escrowAccountDestinations;
+    // }
 
-        Object.assign(escrowSigner, escrow.escrowSignerList[i]);
+    // if (escrow.signerList) {
+    //   const escrowSigners = [];
+    //   for (let i = 0; i < escrow.signerList.length; i++) {
+    //     let escrowSigner = new EscrowSigner();
 
-        escrowSigner = await this.escrowSignerRepository.save(escrowSigner);
+    //     Object.assign(escrowSigner, escrow.signerList[i]);
 
-        escrowSigners.push(escrowSigner);
-      }
-      escrow.escrowSignerList = escrowSigners;
-    }
+    //     escrowSigner = await this.escrowSignerRepository.save(escrowSigner);
 
-    if (escrow.escrowAuditList) {
-      const escrowAudits = [];
-      for (let i = 0; i < escrow.escrowAuditList.length; i++) {
-        let escrowAudit = new EscrowAudit();
-        Object.assign(escrowAudit, escrow.escrowAuditList[i]);
+    //     escrowSigners.push(escrowSigner);
+    //   }
+    //   escrow.signerList = escrowSigners;
+    // }
 
-        escrowAudit = await this.escrowAuditRepository.save(escrowAudit);
+    // if (escrow.auditList) {
+    //   const escrowAudits = [];
+    //   for (let i = 0; i < escrow.auditList.length; i++) {
+    //     let escrowAudit = new EscrowAudit();
+    //     Object.assign(escrowAudit, escrow.auditList[i]);
 
-        escrowAudits.push(escrowAudit);
-      }
-      escrow.escrowAuditList = escrowAudits;
-    }
+    //     escrowAudit = await this.escrowAuditRepository.save(escrowAudit);
 
-    if (escrow.escrowAccountManager) {
-      let escrowAccountManager = new EscrowAccountManager();
-      Object.assign(escrowAccountManager, escrow.escrowAccountManager);
+    //     escrowAudits.push(escrowAudit);
+    //   }
+    //   escrow.auditList = escrowAudits;
+    // }
 
-      if (escrowAccountManager.escrowAccountManagerRepresentativeList) {
+    // if (escrow.accountManager) {
+    //   let escrowAccountManager = new EscrowAccountManager();
+    //   Object.assign(escrowAccountManager, escrow.accountManager);
 
-        const escrowAccountManagerRepresentatives = [];
-        for (let i = 0; i < escrowAccountManager.escrowAccountManagerRepresentativeList.length; i++) {
-          let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
-          Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.escrowAccountManagerRepresentativeList[i]);
+    //   if (escrowAccountManager.accountManagerRepresentativeList) {
 
-          escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
+    //     const escrowAccountManagerRepresentatives = [];
+    //     for (let i = 0; i < escrowAccountManager.accountManagerRepresentativeList.length; i++) {
+    //       let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
+    //       Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.accountManagerRepresentativeList[i]);
 
-          escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
-        }
-        escrowAccountManager.escrowAccountManagerRepresentativeList = escrowAccountManagerRepresentatives;
+    //       escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
 
-      }
+    //       escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
+    //     }
+    //     escrowAccountManager.accountManagerRepresentativeList = escrowAccountManagerRepresentatives;
 
-      escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
+    //   }
 
-      escrow.escrowAccountManager = escrowAccountManager;
-    }
+    //   escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
 
-    if (escrow.escrowAccountOwner) {
-      let escrowAccountOwner = new EscrowAccountOwner();
-      
-      Object.assign(escrowAccountOwner, escrow.escrowAccountOwner);
+    //   escrow.accountManager = escrowAccountManager;
+    // }
 
-      escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
+    // if (escrow.accountOwner) {
+    //   let escrowAccountOwner = new EscrowAccountOwner();
 
-      escrow.escrowAccountOwner = escrowAccountOwner;
+    //   Object.assign(escrowAccountOwner, escrow.accountOwner);
 
-    }
+    //   escrowAccountOwner = await this.escrowAccountOwnerRepository.save(escrowAccountOwner);
+
+    //   escrow.accountOwner = escrowAccountOwner;
+
+    // }
 
     escrow.status = StatusEnum.NEW;
     escrow.createDate = new Date;
@@ -141,7 +147,7 @@ export class EscrowService {
         "escrowAccountManager.escrowAccountManagerRepresentativeList",
         "escrowAccountManagerRepresentative"
       )
-      .where("escrow.id = :id", { id: id })
+      .where("escrow.id = :id", { id })
       .getOne();
     return escrow;
   }
@@ -193,6 +199,80 @@ export class EscrowService {
       .leftJoinAndSelect("escrowAccountManager.escrowAccountManagerRepresentativeList", "escrowAccountManagerRepresentative")
       .where("escrow.status = :status", { status })
       .getMany();
+  }
+
+  async escrowConverter(debit: DebtDto) {
+    let escrow = new EscrowDto();
+    escrow.destinationAccounts = [];
+    escrow.accountOwner = new EscrowAccountOwnerDto();
+    escrow.accountManager = new EscrowAccountManagerDto();
+    let accountManager = {
+      "type": "PJ",
+      "name": "Kaique e Giovanna Contábil ME",
+      "cnaeCode": "6499-9/99",
+      "companyDocumentNumber": "09456933000162",
+      "companyStatuteAttach": "123",
+      "email": "kaiqueegiovannacontabilme@yopmail.com",
+      "foundationDate": new Date("2014-08-21"),
+      "personType": "legal",
+      "addressStreet": "Av. Brigadeiro Faria Lima",
+      "addressState": "SP",
+      "addressCity": "São Paulo",
+      "addressNeighborhood": "Jardim Paulistano",
+      "addressNumber": "2391",
+      "addressPostalCode": "01452960",
+      "addressComplement": "7 andar",
+      "phoneCountryCode": "055",
+      "phoneAreaCode": "11",
+      "phoneNumber": "999999999",
+      "motherName": "123",
+      "birthDate": new Date("2021-05-05"),
+      "nationality": "Brasileira",
+      "isPep": false,
+      "individualDocumentNumber": "85324558400",
+      "documentIdentificationAttach": "123",
+      "proofOfResidenceAttach": "123",
+      "tradingName": "TESTE",
+      "accountManagerRepresentativeList": [
+        {
+          "personType": "natural",
+          "name": "Aurora Simone Catarina Nogueira",
+          "motherName": "Maria Mariane",
+          "birthDate": new Date("1990-05-06"),
+          "nationality": "Brasileira",
+          "isPep": false,
+          "individualDocumentNumber": "08141163701",
+          "documentIdentificationAttach": "123",
+          "email": "aurora.nogueira@yopmail.com",
+          "phoneCountryCode": "055",
+          "phoneAreaCode": "11",
+          "phoneNumber": "9128281359",
+          "addressStreet": "Passagem Mariana",
+          "addressState": "PA",
+          "addressCity": "Ananindeua",
+          "addressNeighborhood": "Águas Lindas",
+          "addressNumber": "660",
+          "addressPostalCode": "67118003",
+          "addressComplement": "complemento",
+          "proofOfResidenceAttach": "123"
+        }
+
+      ]
+
+    }
+
+    Object.assign(escrow.destinationAccounts, debit.destinationAccounts);
+    Object.assign(escrow.accountOwner, debit.borrower);
+    Object.assign(escrow.accountManager, accountManager);
+
+    escrow.accountOwner.name = debit.borrower.fullName;
+    escrow.accountOwner.type = 'PF';
+    escrow.accountOwner.phoneCountryCode = "055";
+    escrow.accountOwner.phoneAreaCode = "11";
+    escrow.accountOwner.phoneNumber = "999999999";
+
+    return escrow;
+
   }
 
 }
