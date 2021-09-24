@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from "@nestjs/typeorm";
 import { DebtsService } from 'src/debts/debts.service';
 import { DebtDto } from 'src/debts/dto/debt.dto';
+import { DebtEntity } from 'src/debts/entities/Debt.entity';
 import { Escrow } from 'src/escrow/entities/escrow.entity';
 import { StatusEnum } from 'src/escrow/enum/status';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { QitechService } from 'src/qitech/qitech.service';
-import { PonttePayload } from './dto/payload';
+import { Repository } from "typeorm";
+import { PontteContractDto } from './dto/PontteContractDto';
+import { PontteContract } from './entites/pontte-contract.entity';
 let dateFormat = require('dateformat');
 const fs = require('fs');
 
@@ -15,6 +19,8 @@ const fs = require('fs');
 export class PontteContractService {
 
   constructor(
+    @InjectRepository(PontteContract)
+    private pontteRepository: Repository<PontteContract>,
     private readonly escrowService: EscrowService,
     private readonly qitechService: QitechService,
     private readonly googleDriveService: GoogleDriveService,
@@ -24,84 +30,104 @@ export class PontteContractService {
 
   async saveEscrowAndDebit(payload: DebtDto) {
     //ajustar payload
-    this.debtsService.create(payload);
+    let debit = await this.debtsService.create(payload);
 
-    let escrow =  await this.escrowService.escrowConverter(payload);
-    this.escrowService.create(escrow);
+    let escrow = await this.escrowService.escrowConverter(payload);
+    let escrowEntity =  await this.escrowService.create(escrow);
+
+    let pontteContractDto = {
+      debit,
+      escrow: escrowEntity,
+      name: debit.borrower.fullName,
+      amount: debit.financial.amount,
+      documentNumber: debit.borrower.documentIdentificationNumber
+    };
+
+    this.createPontteContract(pontteContractDto);
     // this.escrowService.escrowConverter(payload);
   }
 
-  async callQiTech() {
-    //como ligar uma conta escrow a uma solicitação de divida??
-    this.createEscrowAccountQiTech();
-    this.createDebitQiTech();
-  }
-
-  async createDebitQiTech() {
+  async createDebitQiTech(debit: DebtEntity) {
     //buscar por status
-    const listDebtsPending = await this.debtsService.findByStatus(StatusEnum.NEW);
+    // const listDebtsPending = await this.debtsService.findByStatus(StatusEnum.NEW);
     //precisa validar algo?
 
-    await Promise.all(listDebtsPending.map(async (debit) => {
-      // enviar para qitech
-      let resp = await this.qitechService.createDebt(debit);
+    // await Promise.all(listDebtsPending.map(async (debit) => {
+    // enviar para qitech
+    let resp = await this.qitechService.createDebt(debit);
+    console.log('resp');
+    console.log(resp);
+    let { data } = resp;
 
+    if (data) {
+      //precis salvar algum retorno?
+      //numero cci, ipoc
+      //status
+      console.log(data);
+      debit.status = StatusEnum.REVIEW;
+      this.debtsService.updateDebit(debit);
+    }
+
+    // }))
+
+  }
+
+
+  async initializeContract() {
+    const listPontteContractPending = await this.findListByStatus(StatusEnum.NEW);
+
+    await Promise.all(listPontteContractPending.map(async (contract) => {
+      this.createEscrowAccountQiTech(contract.escrow);
+      this.createDebitQiTech(contract.debit);
+
+      contract.status = StatusEnum.REVIEW;
+      contract.updateDate = new Date();
+      this.updateContract(contract);
+
+    }))
+  }
+
+  async createEscrowAccountQiTech(escrowPending: Escrow) {
+    // const listEscrowPending = await this.escrowService.findListByStatus(StatusEnum.NEW);//validar status
+
+    // await Promise.all(listEscrowPending.map(async (escrowPending) => {
+    //upload
+    this.uploadDocument(escrowPending);
+
+    if (this.validateDocumentOk(escrowPending)) {
+
+      let escrowRequest = {
+        destination_list: this.getDestinationList(escrowPending),
+        account_manager: this.getAccountManagerList(escrowPending),
+        account_owner: this.getAccountOwner(escrowPending),
+      }
+
+      let allowed_User = this.getAllowedUser(escrowPending)//validar se é PJ
+
+      if (allowed_User) {
+        escrowRequest['allowed_User'] = allowed_User;
+      }
+
+      let resp = await this.qitechService.createAccount(escrowRequest);//testar com dados reais
+      //validar response
+      //salvar se deu bom
+      console.log('resp');
+      console.log(resp);
       let { data } = resp;
 
       if (data) {
-        //precis salvar algum retorno?
-        //numero cci, ipoc
-        //status
         console.log(data);
-        debit.status = StatusEnum.REVIEW;
-        this.debtsService.updateDebit(debit);
-      }
-
-    }))
-
-  }
-
-  async createEscrowAccountQiTech() {
-    const listEscrowPending = await this.escrowService.findListByStatus(StatusEnum.NEW);//validar status
-
-    await Promise.all(listEscrowPending.map(async (escrowPending) => {
-      //upload
-      this.uploadDocument(escrowPending);
-
-      if (this.validateDocumentOk(escrowPending)) {
-
-        let escrowRequest = {
-          destination_list: this.getDestinationList(escrowPending),
-          account_manager: this.getAccountManagerList(escrowPending),
-          account_owner: this.getAccountOwner(escrowPending),
-        }
-
-        let allowed_User = this.getAllowedUser(escrowPending)//validar se é PJ
-
-        if (allowed_User) {
-          escrowRequest['allowed_User'] = allowed_User;
-        }
-
-        let resp = await this.qitechService.createAccount(escrowRequest);//testar com dados reais
-        //validar response
-        //salvar se deu bom
-        console.log('resp');
-        console.log(resp);
-        let { data } = resp;
-
-        if (data) {
-          console.log(data);
-          escrowPending.accountBranch = data.account_info.account_branch;
-          escrowPending.accountNumber = data.account_info.account_number;
-          //digito
-          escrowPending.status = StatusEnum.REVIEW;
-          this.escrowService.updateEscrow(escrowPending);
-        }
-
+        escrowPending.accountBranch = data.account_info.account_branch;
+        escrowPending.accountNumber = data.account_info.account_number;
+        //digito
+        escrowPending.status = StatusEnum.REVIEW;
+        this.escrowService.updateEscrow(escrowPending);
       }
 
     }
-    ))
+
+    // }
+    // ))
   }
 
   getDestinationList(escrow) {
@@ -309,7 +335,7 @@ export class PontteContractService {
     if (!escrow.escrowAccountOwner.proofOfResidenceAttach) documentOk = false;
     // if (!escrow.escrowAccountOwner.directorsElectionMinute) documentOk = false;
 
-    if (escrow.escrowAccountManager.type == "PF") {
+    if (escrow.escrowAccountManager.type == "PF") {//VERIFICAR SE VAI PRECISAR FAZER UPLOAD DOS DOCUMENTOS PARA ACCOUNT MANAGER VISTO Q ESTARA FIXO EM UM ARQUIVO DE CONFIG
       if (!escrow.escrowAccountManager.documentIdentificationAttach) documentOk = false;
       if (!escrow.escrowAccountManager.proofOfResidenceAttach) documentOk = false;
     } else if (escrow.escrowAccountManager.type == "PJ") {
@@ -501,12 +527,36 @@ export class PontteContractService {
     });
   }
 
-  async debit() {
-    this.qitechService.debit({});
+  async createPontteContract(pontteContractDto) {
+    let contract = new PontteContract();
+    Object.assign(contract, pontteContractDto);
+
+    contract.status = StatusEnum.NEW;
+    contract.createDate = new Date;
+
+    console.log('contract');
+    console.log(contract);
+    contract = await this.pontteRepository.save(contract);
+    return contract;
   }
 
 
 
+  async findListByStatus(status: number) {
+    return await this.pontteRepository.createQueryBuilder("pontteContract")
+      .leftJoinAndSelect("pontteContract.escrow", "escrow")
+      .leftJoinAndSelect("pontteContract.debit", "debit")
+      .where("escrow.status = :status", { status })
+      .getMany();
+  }
+
+  async updateContract(contract: PontteContract) {
+    return await this.pontteRepository.save(contract);
+  }
+
+  async teste (){
+    this.qitechService.debit(null);
+  }
 
 
 }

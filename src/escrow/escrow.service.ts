@@ -39,10 +39,6 @@ export class EscrowService {
     let escrow = new Escrow();
     Object.assign(escrow, escrowDto);
 
-    console.log('escrow');
-    console.log(escrow);
-
-
     // if (escrow.destinationAccounts != null) {
     //   const escrowAccountDestinations = [];
     //   for (let i = 0; i < escrow.destinationAccounts.length; i++) {
@@ -84,29 +80,29 @@ export class EscrowService {
     //   escrow.auditList = escrowAudits;
     // }
 
-    // if (escrow.accountManager) {
-    //   let escrowAccountManager = new EscrowAccountManager();
-    //   Object.assign(escrowAccountManager, escrow.accountManager);
+    if (escrow.accountManager) {
+      let escrowAccountManager = new EscrowAccountManager();
+      Object.assign(escrowAccountManager, escrow.accountManager);
 
-    //   if (escrowAccountManager.accountManagerRepresentativeList) {
+      if (escrowAccountManager.accountManagerRepresentativeList) {
 
-    //     const escrowAccountManagerRepresentatives = [];
-    //     for (let i = 0; i < escrowAccountManager.accountManagerRepresentativeList.length; i++) {
-    //       let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
-    //       Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.accountManagerRepresentativeList[i]);
+        const escrowAccountManagerRepresentatives = [];
+        for (let i = 0; i < escrowAccountManager.accountManagerRepresentativeList.length; i++) {
+          let escrowAccountManagerRepresentative = new EscrowAccountManagerRepresentative();
+          Object.assign(escrowAccountManagerRepresentative, escrowAccountManager.accountManagerRepresentativeList[i]);
 
-    //       escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
+          escrowAccountManagerRepresentative = await this.escrowAccountManagerRepresentativeRepository.save(escrowAccountManagerRepresentative);
 
-    //       escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
-    //     }
-    //     escrowAccountManager.accountManagerRepresentativeList = escrowAccountManagerRepresentatives;
+          escrowAccountManagerRepresentatives.push(escrowAccountManagerRepresentative);
+        }
+        escrowAccountManager.accountManagerRepresentativeList = escrowAccountManagerRepresentatives;
 
-    //   }
+      }
 
-    //   escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
+      escrowAccountManager = await this.escrowAccountManagerRepository.save(escrowAccountManager);
 
-    //   escrow.accountManager = escrowAccountManager;
-    // }
+      escrow.accountManager = escrowAccountManager;
+    }
 
     // if (escrow.accountOwner) {
     //   let escrowAccountOwner = new EscrowAccountOwner();

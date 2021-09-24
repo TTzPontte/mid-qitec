@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { DebtsService } from 'src/debts/debts.service';
 import { DebtDto } from 'src/debts/dto/debt.dto';
+import { DebtEntity } from 'src/debts/entities/Debt.entity';
 import { EscrowDto } from 'src/escrow/dto/escrow.dto';
 import { EscrowService } from 'src/escrow/escrow.service';
-import { PonttePayload } from './dto/payload';
 import { PontteContractService } from './pontte-contract.service';
 
 const fs = require('fs');
@@ -19,7 +19,10 @@ export class PontteContractController {
 
   @Post('/debit')
   createDebit(@Body() debtDto: DebtDto) {
-    return this.debtsService.create(debtDto);
+    // return this.debtsService.create(debtDto);
+    return this.pontteContractService.teste();
+
+
   }
 
   @Post('/escrow')
@@ -34,7 +37,7 @@ export class PontteContractController {
 
   @Get()
   callQiTech() {
-    this.pontteContractService.callQiTech();
+    this.pontteContractService.initializeContract();
   }
 
 }

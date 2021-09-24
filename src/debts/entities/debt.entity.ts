@@ -1,22 +1,23 @@
+import { PontteContract } from "src/pontte-contract/entites/pontte-contract.entity";
 import {
   Column,
   Entity,
   JoinColumn,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn
 } from "typeorm";
-import { FeeEntity } from "./Fee.entity";
-import { AttachmentEntity } from "./Attachment.entity";
-import { IncomeCompositionEntity } from "./IncomeComposition.entity";
-import { DisbursementAccountEntity } from "./DisbursementAccount.entity";
 import { AdditionalDebtEntity } from "./AdditionalDebt.entity";
-import { RelatedPartiesEntity } from "./RelatedParties.entity";
+import { AttachmentEntity } from "./Attachment.entity";
 import { BorrowerEntity } from "./Borrower.entity";
 import { DestinationAccountEntity } from "./DestinationAccount.entity";
-import { InstallmentEntity } from "./Installment.entity";
+import { DisbursementAccountEntity } from "./DisbursementAccount.entity";
+import { FeeEntity } from "./Fee.entity";
 import { FinancialEntity } from "./Financial.entity";
+import { IncomeCompositionEntity } from "./IncomeComposition.entity";
+import { InstallmentEntity } from "./Installment.entity";
 import { RealEstateEntity } from "./RealEstate.entity";
+import { RelatedPartiesEntity } from "./RelatedParties.entity";
 
 @Entity("debt", { schema: "pontte_escrow" })
 export class DebtEntity {
@@ -114,4 +115,9 @@ export class DebtEntity {
 
   @OneToMany(() => RealEstateEntity, (realEstate) => realEstate.debt)
   realEstates: RealEstateEntity[];
+
+
+  
+  @OneToOne(() => PontteContract, (pontteContract: PontteContract) => pontteContract.debit)
+  pontteContract: PontteContract;
 }

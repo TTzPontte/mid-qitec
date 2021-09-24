@@ -25,6 +25,7 @@ import { Escrow } from 'src/escrow/entities/escrow.entity';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { QitechService } from 'src/qitech/qitech.service';
+import { PontteContract } from './entites/pontte-contract.entity';
 import { PontteContractController } from './pontte-contract.controller';
 import { PontteContractService } from './pontte-contract.service';
 
@@ -41,7 +42,8 @@ import { PontteContractService } from './pontte-contract.service';
     RePossessionCompositionEntity,
     RealEstateEntity,
     RelatedPartiesEntity,
-    IncomeCompositionEntity,])],
+    IncomeCompositionEntity,
+  PontteContract])],
   controllers: [PontteContractController],
   providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService, ConfigService, DebtsService]
 })

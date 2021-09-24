@@ -27,6 +27,7 @@ import { InstallmentEntity } from 'src/debts/entities/Installment.entity';
 import { RealEstateEntity } from 'src/debts/entities/RealEstate.entity';
 import { RelatedPartiesEntity } from 'src/debts/entities/RelatedParties.entity';
 import { RePossessionCompositionEntity } from 'src/debts/entities/RePossessionComposition.entity';
+import { PontteContract } from 'src/pontte-contract/entites/pontte-contract.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner, DebtEntity,
@@ -41,7 +42,7 @@ import { RePossessionCompositionEntity } from 'src/debts/entities/RePossessionCo
     RePossessionCompositionEntity,
     RealEstateEntity,
     RelatedPartiesEntity,
-    IncomeCompositionEntity,])],
+    IncomeCompositionEntity,PontteContract])],
   controllers: [QitechController],
   providers: [QitechService, EscrowService, GoogleDriveService, PontteContractService, ConfigService, DebtsService]
 })

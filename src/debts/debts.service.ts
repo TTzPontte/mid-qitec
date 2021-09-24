@@ -89,7 +89,6 @@ export class DebtsService {
 		return returnList;
 	};
 	create = async (debtDto: DebtDto) => {
-		console.log(debtDto);
 
 		let debt = new DebtEntity();
 		debt = Object.assign(debt, debtDto);

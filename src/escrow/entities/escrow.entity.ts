@@ -1,8 +1,9 @@
+import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
 import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
 import { EscrowAccountOwner } from 'src/escrow/entities/escrow-account-owner.entity';
 import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
-import { EscrowAccountDestination } from 'src/escrow/entities/escrow-account-destination.entity';
+import { PontteContract } from 'src/pontte-contract/entites/pontte-contract.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -11,8 +12,8 @@ export class Escrow {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: 'pontte_contract_id', nullable: true })
-    pontteContractId: number;
+    @OneToOne(() => PontteContract, (pontteContract: PontteContract) => pontteContract.escrow)
+    pontteContract: PontteContract;
 
     @Column({ type: 'varchar', length: 45, name: 'account_branch', nullable: true })
     accountBranch: string;

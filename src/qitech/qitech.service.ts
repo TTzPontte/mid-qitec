@@ -20,8 +20,10 @@ export class QitechService {
    public async createDebt(data) {
       let qitechResponse: any;
       try {
+         console.log('teste')
          qitechResponse = await this.qitech_wrapper.debt.post(data);
-         console.log(qitechResponse.decoded)
+         console.log('qitechResponse')
+         console.log(qitechResponse)
          return qitechResponse.decoded
       } catch (error) {
          console.error(error.decoded);
@@ -194,6 +196,7 @@ export class QitechService {
       }
       let qitechResponse;
       try {
+         console.log('teste')
          qitechResponse = await this.qitech_wrapper.debt.post(payload);
          console.log('qitechResponse.decoded');
          console.log(qitechResponse.decoded);
