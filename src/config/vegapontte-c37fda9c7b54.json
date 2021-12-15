@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "vegapontte",
+  "private_key_id": "c37fda9c7b5478b2a672683cc3213bae907907c0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDZzwH0H/mrft3z\ntqhlY3GLQKwaf9TQqQQNFDp2JPHyroZKMktfFBH68cvbodxFCDCXny8LuvKy9/iV\nvrwfLuukzFDB2pfyFsquY8m+eg/A1iqpYIzbVKlIFQE8HKYZTNzlKRrqltM3WXc3\nv+p0QKq6zxARDoG/f6RHSi8h9EJOyeqkVVFitfHnXd5GF8SebwdxbE3eRC4cFYwu\nJ//3xXb2z2vWsdWBfk4PVUNfq6jSRtr6hq9vTXurU+18kMxQKy/JcBhVn2aISgtM\n4jZ3VqcKbsgJQ08niFjGkMMqychmNvnHF+grYE2fwLnp0/0x1NN+Hi+Rswd3PH1N\n2yrFJPMvAgMBAAECggEAEjWLPUSbE+pUVfa0V12b9X9fpAuB2Dv5GbrSNGRcUeSj\nV3qi8Hz2D9u9Jkx+5MqNfW+SeFGVzr6KasJ6acT7cFige8RxpYygPzoaeLEttfpx\nsJ1gyUlnqZ4P712ZyU2yvfnUxT38xIjXPbLuv+9UFrAO8M4crMzYCBm8nQMVtA5n\n8e5sowtukubUl6bww3Aqi6ElF9G8dflwTk0lYSk6Ztkgu9NZBsg3QSPATaNpYxA2\n8AoyjR4DGoVKU5ytUYy2WvQ77YjAK+WkZu75+KgM+UHFRN5kgauvba1GHlH04yqV\nnsmfH82P6opk3GamJQwfhDJzimQBsrXHQR9fMLxzCQKBgQDvXEetb3KEWA1uu7Xs\nuO7sYcuH45wkeCT0VfPu1lzS2MHb/OxQC7CWg1D3JhgnJlBZS1b02a6FFqcFruiq\n92SLSAtYep/+jUtFICQwrdUzTx2e5kK5uO/b+2ApPHDw8bHJdTir+LPUIbHHFj4Z\n0LIMG7J0RBIVyAs7bEihKFU8rQKBgQDo8y99Gc6u0UT3HFKXikCD6z6el7QIWHxI\nzMgaXhMcMbLv6sZ2dKu/PWFZ2Z5kWoq28AhoDjBbhq/DRRUv3gfrlogr8EWlWGen\nuwuiqADumd/smXaLPkYzv1X9bNMzorVHDpQPgpYPbKmh6Q39X0EffZ2ZJ82zjgr9\n/vqrn1nuywKBgATW28gg4bLVSOg9OU9g6cuzqnbD3ktKdozOFBF3GgdVRI4bDfgM\nVHSmkQN+LKzV9HfpswdeQ04DiDrwL1oNiGXcfgY67HMsDiKGpNSrHw1bgyDMTPsO\nRyMucOJEi5ADgvGswgmQDKq0R7DbvUOuWXsvMCtzmN4B3mBELy+67gY9AoGAHViF\nYv0dTGiQh5DJ1s1T00qPWOtDgsmi3ojtrGStg5+/KvoohkOsXyscWHVRvtKpJuKW\nLIWdEeqlubO6N42A8ezEusRKAcphRIALtzHy7Bv2WZf7lw8BSQORkZtj/90/ePQd\nMtcAkHDf7cWuPX0CdzUb5W9eOoBqYhT8/yHT8oECgYAe/vm08dV5bN8peEJkvn0H\nJylZYD2pYHK2b1U+fCqdwgzbF+hYv9lccYlfeAgY6dWG1cBTaAvCyjMbfOlytumz\nCa8dUFhopx3rZxMqie6YAMM/Er2XqAwwMH3oRh5/jIyIGcV329pN0wGux2Vv7r9m\n6l0ReOTvIW5Za0EMacTsgA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "vega-pontte@vegapontte.iam.gserviceaccount.com",
+  "client_id": "105993495983349494922",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vega-pontte%40vegapontte.iam.gserviceaccount.com"
+}
