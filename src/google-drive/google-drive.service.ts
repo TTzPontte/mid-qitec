@@ -13,7 +13,7 @@ export class GoogleDriveService {
     let credentials = JSON.parse(this.CREDENTIAL_RAW_DATA);
     const client = await google.auth.getClient({
       credentials,
-      scopes: this.configService.get('config.GOOGLE_SCOPE'),
+      scopes: process.env.GOOGLE_SCOPE,
     });
 
     const drive = await google.drive({ version: 'v3', auth: client, });
@@ -41,18 +41,18 @@ export class GoogleDriveService {
     const returnData = [];
     const client = await google.auth.getClient({
       credentials,
-      scopes: this.configService.get('config.GOOGLE_SCOPE'),
+      scopes: process.env.GOOGLE_SCOPE,
     });
 
     const drive = await google.drive({ version: 'v3', auth: client, });
     
-    var dest = fs.createWriteStream(`${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`);
+    var dest = fs.createWriteStream(`${process.env.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`);
 
     await drive.files
       .get({ fileId, alt: 'media' }, { responseType: 'stream' })
       .then(async res => {
         return await new Promise((resolve, reject) => {
-          const filePath = `${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`;
+          const filePath = `${process.env.GOOGLE_DRIVE_FOLDER}/${fileId}.pdf`;
           console.log(`writing to ${filePath}`);
           const dest = fs.createWriteStream(filePath);
           let progress = 0;

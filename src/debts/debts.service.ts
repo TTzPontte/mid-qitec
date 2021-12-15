@@ -21,7 +21,7 @@ const QITtech = require("qitech-wrapper");
 @Injectable()
 export class DebtsService {
 	qitech_wrapper = QITtech({
-		clientKey: config.QITECH_CLIENTKEY,
+		clientKey: process.env.QITECH_CLIENTKEY,
 		privateKey: config.QITECH_PRIVATEKEY,
 		publicKey: config.QITECH_PUBLICKEY,
 	});
