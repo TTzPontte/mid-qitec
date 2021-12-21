@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { DebtsService } from "../debts.service";
-import {FeeEntityRepository} from "../entities/FeeEntityRepository"
+// import {FeeEntityRepository} from "../entities/FeeEntityRepository"
 describe("DebtsService", () => {
   let service: DebtsService;
 
