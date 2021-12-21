@@ -1,10 +1,10 @@
 {
-    "type": "mysql",
-    "host": "localhost",
-    "port": 3306,
-    "username": "root",
-    "password": "12345678",
-    "database": "pontte_escrow",
-    "entities": ["dist/**/*.entity{.ts,.js}"],
-    "synchronize": true
-  }
+  "type": "mysql",
+  "host": "pontte-cadastro-dev.csh615oggums.us-east-1.rds.amazonaws.com",
+  "port": 3306,
+  "username": "midqitech",
+  "password": "midqitech",
+  "database": "pontte_escrow",
+  "entities": ["dist/*/.entity{.ts,.js}"],
+  "synchronize": true
+}
