@@ -10,7 +10,19 @@ import { QitechModule } from './qitech/qitech.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({ autoLoadEntities: true }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'mysql',
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT, 10),
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        logging: true,
+        synchronize: true,
+      }),
+    }),    
     EscrowModule,
     QitechModule,
     PontteContractModule,
