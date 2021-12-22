@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
-const FormData = require('form-data')
-var dateFormat = require('dateformat');
 const QITtech = require('qitech-wrapper');
 
 @Injectable()

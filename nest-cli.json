@@ -9,6 +9,11 @@
         "watchAssets": true
       },
       {
+        "include": "./ormconfig.json", 
+        "outDir": "./dist",
+        "watchAssets": true
+      },      
+      {
         "include": "../src/config/*.yaml", 
         "outDir": "./dist/src/",
         "watchAssets": true
