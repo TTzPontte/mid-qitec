@@ -1,6 +1,6 @@
 
-import { DebtEntity } from 'src/debts/entities/Debt.entity';
-import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { DebtEntity } from '../../debts/entities/Debt.entity';
+import { Escrow } from '../../escrow/entities/escrow.entity';
 import { Column, Double, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

@@ -1,5 +1,5 @@
-import { EscrowAccountManagerRepresentative } from 'src/escrow/entities/escrow-account-manager-representative.entity';
-import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { EscrowAccountManagerRepresentative } from '../../escrow/entities/escrow-account-manager-representative.entity';
+import { Escrow } from '../../escrow/entities/escrow.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 
 @Entity()

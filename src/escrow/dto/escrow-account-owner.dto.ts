@@ -1,4 +1,4 @@
-import { EscrowDto } from "src/escrow/dto/escrow.dto";
+import { EscrowDto } from "../../escrow/dto/escrow.dto";
 
 export class EscrowAccountOwnerDto {
 

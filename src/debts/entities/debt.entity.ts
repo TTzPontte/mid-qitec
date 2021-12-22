@@ -1,4 +1,4 @@
-import { PontteContract } from "src/pontte-contract/entites/pontte-contract.entity";
+import { PontteContract } from "../../pontte-contract/entites/pontte-contract.entity";
 import {
   Column,
   Entity,

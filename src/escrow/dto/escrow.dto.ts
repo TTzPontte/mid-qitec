@@ -1,8 +1,8 @@
-import { EscrowAccountDestinationDto } from "src/escrow/dto/escrow-account-destination.dto";
-import { EscrowAccountManagerDto } from "src/escrow/dto/escrow-account-manager.dto";
-import { EscrowAccountOwnerDto } from "src/escrow/dto/escrow-account-owner.dto";
-import { EscrowAuditDto } from "src/escrow/dto/escrow-audit.dto";
-import { EscrowSignerDto } from "src/escrow/dto/escrow-signer.dto";
+import { EscrowAccountDestinationDto } from "../../escrow/dto/escrow-account-destination.dto";
+import { EscrowAccountManagerDto } from "../../escrow/dto/escrow-account-manager.dto";
+import { EscrowAccountOwnerDto } from "../../escrow/dto/escrow-account-owner.dto";
+import { EscrowAuditDto } from "../../escrow/dto/escrow-audit.dto";
+import { EscrowSignerDto } from "../../escrow/dto/escrow-signer.dto";
 
 export class EscrowDto {
 

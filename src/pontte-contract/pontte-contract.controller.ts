@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { DebtsService } from 'src/debts/debts.service';
-import { DebtDto } from 'src/debts/dto/debt.dto';
-import { DebtEntity } from 'src/debts/entities/Debt.entity';
-import { EscrowDto } from 'src/escrow/dto/escrow.dto';
-import { EscrowService } from 'src/escrow/escrow.service';
+import { DebtsService } from '../debts/debts.service';
+import { DebtDto } from '../debts/dto/debt.dto';
+import { DebtEntity } from '../debts/entities/Debt.entity';
+import { EscrowDto } from '../escrow/dto/escrow.dto';
+import { EscrowService } from '../escrow/escrow.service';
 import { PontteContractService } from './pontte-contract.service';
 
 const fs = require('fs');

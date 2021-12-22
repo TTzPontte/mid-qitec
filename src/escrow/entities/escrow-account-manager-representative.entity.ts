@@ -1,4 +1,4 @@
-import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
+import { EscrowAccountManager } from '../../escrow/entities/escrow-account-manager.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()

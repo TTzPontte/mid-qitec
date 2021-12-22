@@ -13,8 +13,8 @@ import { InstallmentEntity } from "./entities/Installment.entity";
 import { RealEstateEntity } from "./entities/RealEstate.entity";
 import { DisbursementAccountEntity } from "./entities/DisbursementAccount.entity";
 import { FinancialEntity } from "./entities/Financial.entity";
-import config from "src/config/config";
-import { StatusEnum } from "src/escrow/enum/status";
+import config from "../config/config";
+import { StatusEnum } from "../escrow/enum/status";
 
 const QITtech = require("qitech-wrapper");
 

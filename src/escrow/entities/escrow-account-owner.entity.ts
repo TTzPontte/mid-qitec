@@ -1,4 +1,4 @@
-import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { Escrow } from '../../escrow/entities/escrow.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()

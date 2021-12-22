@@ -27,7 +27,7 @@
         "include": "../src/config/vegapontte-c37fda9c7b54.json", 
         "outDir": "./dist/src/",
         "watchAssets": true
-      }                  
+      }                      
     ]
   }  
 }
