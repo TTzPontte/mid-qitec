@@ -6,5 +6,5 @@
     "password": "12345678",
     "database": "pontte_escrow",
     "entities": ["dist/**/*.entity{.ts,.js}"],
-    "synchronize": true
+    "synchronize": false
   }

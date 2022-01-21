@@ -139,8 +139,8 @@ export class DebtsService {
 		return `This action updates a #${id} debt`;
 	};
 
-	async updateDebit(debit: DebtEntity) {
-		return await this.debtRepository.save(debit);
+	async updateDebt(debt: DebtEntity) {
+		return await this.debtRepository.save(debt);
 	  }
 
 	remove = async (id: number) => {

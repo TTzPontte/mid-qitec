@@ -118,6 +118,7 @@ export class DebtEntity {
 
 
   
-  @OneToOne(() => PontteContract, (pontteContract: PontteContract) => pontteContract.debit)
+  @OneToOne(() => PontteContract, (pontteContract: PontteContract) => pontteContract.debt)
   pontteContract: PontteContract;
+
 }

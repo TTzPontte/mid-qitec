@@ -20,7 +20,8 @@ export class QitechService {
    public async createDebt(data) {
       let qitechResponse: any;
       try {
-         console.log('teste')
+         console.log('createDebt')
+         console.log(data)
          qitechResponse = await this.qitech_wrapper.debt.post(data);
          console.log('qitechResponse')
          console.log(qitechResponse)
@@ -60,7 +61,7 @@ export class QitechService {
 
    }
 
-   async debit(payload) {
+   async debt(payload) {
 
       payload = {
          "borrower": {

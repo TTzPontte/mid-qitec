@@ -19,6 +19,8 @@ export class EscrowAccountOwner {
     companyDocumentNumber: string;
     @Column({ type: 'varchar', length: 45, name: 'company_statute_attach', nullable: true })
     companyStatuteAttach: string;
+    @Column({ type: 'varchar', length: 5000, name: 'company_statute_attach_base64', nullable: true })
+    companyStatuteAttachBase64: string;
     @Column({ type: 'varchar', length: 255, name: 'email' })
     email: string;
     @Column({ type: 'date', name: 'foundation_date' })
@@ -59,4 +61,9 @@ export class EscrowAccountOwner {
     documentIdentificationAttach: string;
     @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach', nullable: true })
     proofOfResidenceAttach: string;
+
+    @Column({ type: 'varchar', length: 5000, name: 'document_identification_attach_base64', nullable: true })
+    documentIdentificationAttachBase64: string;
+    @Column({ type: 'varchar', length: 5000, name: 'proof_of_residence_attach_base64', nullable: true })
+    proofOfResidenceAttachBase64: string;
 }

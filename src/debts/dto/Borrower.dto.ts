@@ -35,4 +35,8 @@ export class BorrowerDto {
   addressState: string | null;
   addressStreet: string | null;
   addressCountry: string | null;
+
+  documentIdentificationAttachBase64: string | null;
+  proofOfResidenceAttachBase64: string | null;
+  companyStatuteAttachBase64: string | null;
 }

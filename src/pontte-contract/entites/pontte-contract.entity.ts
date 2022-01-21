@@ -33,10 +33,10 @@ export class PontteContract {
     @JoinColumn({ name: "escrow_id" })
     escrow: Escrow;
 
-    @OneToOne(() => DebtEntity, (debit: DebtEntity) => debit.pontteContract, {
+    @OneToOne(() => DebtEntity, (debt: DebtEntity) => debt.pontteContract, {
         cascade: true,
     })
-    @JoinColumn({ name: "debit_id" })
-    debit: DebtEntity;
+    @JoinColumn({ name: "debt_id" })
+    debt: DebtEntity;
 
 }
