@@ -3,6 +3,7 @@ import { DebtsService } from 'src/debts/debts.service';
 import { DebtDto } from 'src/debts/dto/debt.dto';
 import { EscrowDto } from 'src/escrow/dto/escrow.dto';
 import { EscrowService } from 'src/escrow/escrow.service';
+import { QitechService } from 'src/qitech/qitech.service';
 import { PontteContractService } from './pontte-contract.service';
 
 const fs = require('fs');
@@ -14,11 +15,13 @@ export class PontteContractController {
 
   constructor(private readonly escrowService: EscrowService,
     private readonly pontteContractService: PontteContractService,
+    private readonly qiTechService: QitechService,
     private readonly debtsService: DebtsService) { }
 
   @Post('/debt')
   createDebt(@Body() debtDto: DebtDto) {
-    return this.debtsService.create(debtDto);
+    // return this.debtsService.create(debtDto);
+    return this.qiTechService.debt("");
     // return this.pontteContractService.teste();
 
 
@@ -35,8 +38,8 @@ export class PontteContractController {
   }
 
   @Get()
-  callQiTech() {
-    this.pontteContractService.initializeContract();
+  async callQiTech() {
+    await this.pontteContractService.initializeContract();
   }
 
 }

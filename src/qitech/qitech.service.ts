@@ -1,28 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InstallmentDto } from 'src/debts/dto/Installment.dto';
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const FormData = require('form-data')
 var dateFormat = require('dateformat');
 const QITtech = require('qitech-wrapper');
+const fs = require('fs');
+var path = require("path");
 
 @Injectable()
 export class QitechService {
 
    constructor(private readonly configService: ConfigService) { }
 
-   qitech_wrapper = QITtech({
-      clientKey: this.configService.get('config.QITECH_CLIENTKEY'),
-      privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
-      publicKey: this.configService.get('config.QITECH_PUBLICKEY')
-   });
+
 
    public async createDebt(data) {
+
+      let qitech_wrapper = QITtech({
+         clientKey: this.configService.get('config.QITECH_CLIENTKEY'),
+         privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
+         publicKey: this.configService.get('config.QITECH_PUBLICKEY')
+      });
+
+
+
       let qitechResponse: any;
       try {
          console.log('createDebt')
          console.log(data)
-         qitechResponse = await this.qitech_wrapper.debt.post(data);
+         let request = {
+            installments: data.installments,
+            borrower: data.borrower,
+            financial: data.financial
+         };
+
+         qitechResponse = await qitech_wrapper.debt.post(JSON.stringify(request));
          console.log('qitechResponse')
          console.log(qitechResponse)
          return qitechResponse.decoded
@@ -33,9 +47,13 @@ export class QitechService {
 
    public async createAccount(data) {
       let qitechResponse: any;
-
+      let qitech_wrapper = QITtech({
+         clientKey: this.configService.get('config.QITECH_CLIENTKEY'),
+         privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
+         publicKey: this.configService.get('config.QITECH_PUBLICKEY')
+      });
       try {
-         qitechResponse = await this.qitech_wrapper.escrow.post(data);
+         qitechResponse = await qitech_wrapper.escrow.post(data);
          console.log(qitechResponse.decoded);
 
          return qitechResponse.decoded;
@@ -48,17 +66,27 @@ export class QitechService {
 
       let qitechResponse
 
+      let qitech_wrapper = QITtech({
+         clientKey: this.configService.get('config.QITECH_CLIENTKEY'),
+         privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
+         publicKey: this.configService.get('config.QITECH_PUBLICKEY')
+      });
+
       try {
-         qitechResponse = await this.qitech_wrapper.upload.post(fileContent);
+         qitechResponse = await qitech_wrapper.upload.post( fileContent);
          console.log('qitechResponse.decoded');
          console.log(qitechResponse.decoded);
          return qitechResponse.decoded;
       } catch (error) {
-         console.error(error.decoded);
+         console.log(error);
          return { document_key: null, document_md5: null };
       }
 
 
+   }
+
+   async downloadFile(fileId){
+      var file = fs.createWriteStream(`${this.configService.get('config.FILE_FOLDER')}/${fileId}.pdf`);
    }
 
    async debt(payload) {
@@ -196,9 +224,14 @@ export class QitechService {
          "purchaser_document_number": "49194383000175"
       }
       let qitechResponse;
+
+      let qitech_wrapper = QITtech({
+         clientKey: this.configService.get('config.QITECH_CLIENTKEY'),
+         privateKey: this.configService.get('config.QITECH_PRIVATEKEY'),
+         publicKey: this.configService.get('config.QITECH_PUBLICKEY')
+      });
       try {
-         console.log('teste')
-         qitechResponse = await this.qitech_wrapper.debt.post(payload);
+         qitechResponse = await qitech_wrapper.debt.post(payload);
          console.log('qitechResponse.decoded');
          console.log(qitechResponse.decoded);
       } catch (err) {

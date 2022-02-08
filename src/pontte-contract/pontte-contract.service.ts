@@ -49,7 +49,10 @@ export class PontteContractService {
 
   async createDebtQiTech(debt: DebtEntity) {
     // enviar para qitech
-    let resp = await this.qitechService.createDebt(debt);
+
+    let debt2 = await this.debtsService.findOne(debt.id);
+
+    let resp = await this.qitechService.createDebt(debt2);
     console.log('createDebtQiTech');
     console.log(resp);
     let { data } = resp;
@@ -60,7 +63,7 @@ export class PontteContractService {
       //status
       console.log(data);
       debt.status = StatusEnum.REVIEW;
-      this.debtsService.updateDebt(debt);
+      await this.debtsService.updateDebt(debt2);
     }
   }
 
@@ -77,8 +80,8 @@ export class PontteContractService {
       console.log(contract.debt);
 
       await this.createEscrowAccountQiTech(contract.escrow);
-      await this.createDebtQiTech(contract.debt);
-//validar retorno antes de salvar
+      // await this.createDebtQiTech(contract.debt);
+      //validar retorno antes de salvar
       contract.status = StatusEnum.REVIEW;
       contract.updateDate = new Date();
       this.updateContract(contract);
@@ -354,17 +357,16 @@ export class PontteContractService {
     // let docs;
 
     //buscar scrowAccontOwner
-console.log("uploadDocument")
-
+    console.log("uploadDocument")
     if (escrow.accountOwner.proofOfResidenceAttachBase64) {
-      escrow.accountOwner.proofOfResidenceAttach = await this.uploadDocumentQiTech(base64.decode(escrow.accountOwner.proofOfResidenceAttachBase64));
+      escrow.accountOwner.proofOfResidenceAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.proofOfResidenceAttachBase64);
       console.log(escrow.accountOwner.proofOfResidenceAttach);
     }
     if (escrow.accountOwner.documentIdentificationAttachBase64) {
-      escrow.accountOwner.documentIdentificationAttach = await this.uploadDocumentQiTech(base64.decode(escrow.accountOwner.documentIdentificationAttachBase64));
+      escrow.accountOwner.documentIdentificationAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.documentIdentificationAttachBase64);
     }
     if (escrow.accountOwner.companyStatuteAttachBase64) {
-      escrow.accountOwner.companyStatuteAttach = await this.uploadDocumentQiTech(base64.decode(escrow.accountOwner.companyStatuteAttachBase64));
+      escrow.accountOwner.companyStatuteAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.companyStatuteAttachBase64);
     }
 
     this.escrowService.updateAccountOwner(escrow.accountOwner);
@@ -467,9 +469,17 @@ console.log("uploadDocument")
 
   // }
 
-  async uploadDocumentQiTech(path) {
-    console.log("uploadDocumentQiTech")
-    const { document_key, document_md5 } = await this.qitechService.upload(path);
+  async uploadDocumentQiTech(fileId, base64Data) {
+
+    let dt = new Date().getTime();
+
+    fs.writeFileSync( `${this.configService.get('config.FILE_FOLDER')}/${dt}.pdf`, base64Data, {encoding: 'base64'},
+     function (err) {console.log(err);}
+     );
+
+    const { document_key, document_md5 } = await this.qitechService.upload(`${this.configService.get('config.FILE_FOLDER')}/${dt}.pdf`);
+    console.log(document_key);
+
     return document_key;
   }
 
@@ -566,6 +576,13 @@ console.log("uploadDocument")
       .leftJoinAndSelect("pontteContract.debt", "debt")
       .leftJoinAndSelect("escrow.accountManager", "accountManager")
       .leftJoinAndSelect("escrow.accountOwner", "accountOwner")
+
+      .leftJoinAndSelect("pontteContract.debt", "borrower")
+      .leftJoinAndSelect("pontteContract.debt", "disbursementAccount")
+      .leftJoinAndSelect("pontteContract.debt", "financial")
+      .leftJoinAndSelect("pontteContract.debt", "externalContractFees")
+
+
       .where("escrow.status = :status", { status })
       .getMany();
   }

@@ -2,7 +2,8 @@ config:
   GOOGLE_SCOPE: 'https://www.googleapis.com/auth/drive'
   GOOGLE_DRIVE_FOLDER: '/opt'
   GOOGLE_CREDENTIAL_RAW_DATA: '/opt/pontte/arquivos/vegapontte-c37fda9c7b54.json'
-  QITECH_CLIENTKEY: "17e5f5b8-3fcd-4fec-b041-1de9f184e585"
+  QITECH_CLIENTKEY: "3fb54232-00c3-44c1-bd99-883f3c50da46"
   QITECH_PRIVATEKEY: "/opt/pontte/arquivos/jwtECDSASHA512.key"
-  QITECH_PUBLICKEY: "/opt/pontte/arquivos/jwtECDSASHA512.key.pub"
+  QITECH_PUBLICKEY: "/opt/pontte/arquivos/jwtQITECH.key"
   ROOT_FOLDER_ID: "12prrnSQu4UDoxSaTzMMxkSchUWDJ-5H4"
+  FILE_FOLDER: '/opt'
