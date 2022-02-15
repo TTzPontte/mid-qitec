@@ -27,11 +27,11 @@ export class Escrow {
     @Column({ name: 'status' })
     status: number;
 
-    @Column({ type: 'varchar', length: 45, name: 'status_name', nullable: true })
-    statusName: string;
+    // @Column({ type: 'varchar', length: 45, name: 'status_name', nullable: true })
+    // statusName: string;
 
-    @Column({ type: 'varchar', length: 100, name: 'status_reason', nullable: true })
-    statusReason: string;
+    // @Column({ type: 'varchar', length: 100, name: 'status_reason', nullable: true })
+    // statusReason: string;
 
     @Column({ type: 'date', name: 'create_date' })
     createDate: Date;
@@ -54,11 +54,11 @@ export class Escrow {
     })
     auditList: EscrowAudit[];
 
-    @OneToOne(() => EscrowAccountManager, (escrowAccountManager: EscrowAccountManager) => escrowAccountManager.escrow, {
-        cascade: true,
-    })
-    @JoinColumn({ name: "escrow_account_manager_id" })
-    accountManager: EscrowAccountManager;
+    // @OneToOne(() => EscrowAccountManager, (escrowAccountManager: EscrowAccountManager) => escrowAccountManager.escrow, {
+    //     cascade: true,
+    // })
+    // @JoinColumn({ name: "escrow_account_manager_id" })
+    // accountManager: EscrowAccountManager;
 
     @OneToOne(() => EscrowAccountOwner, (escrowAccountOwner: EscrowAccountOwner) => escrowAccountOwner.escrow, {
         cascade: true,

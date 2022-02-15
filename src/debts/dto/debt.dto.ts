@@ -31,4 +31,5 @@ export class DebtDto {
   incomeComposition: IncomeCompositionDto[];
   realEstates?: RealEstateDto[];
   attachments: AttachmentDto[];
+  
 }

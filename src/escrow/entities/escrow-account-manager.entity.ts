@@ -7,23 +7,24 @@ export class EscrowAccountManager {
 
     @PrimaryGeneratedColumn()
     id: number;
-    @OneToOne(() => Escrow, (escrow: Escrow) => escrow.accountManager, {
-    })
-    escrow: Escrow;
-    @Column({ type: 'varchar', length: 2, name: 'type' })
-    type: string;
+    // @OneToOne(() => Escrow, (escrow: Escrow) => escrow.accountManager, {
+    // })
+    // escrow: Escrow;
+
+    @Column({ name: 'status' })
+    status: number;
+    // @Column({ type: 'varchar', name: 'type' })
+    // type: string;
     @Column('varchar', { length: 100, name: 'name' })
     name: string;
     @Column({ type: 'varchar', length: 10, name: 'cnae_code' })
     cnaeCode: string;
     @Column({ type: 'varchar', length: 14, name: 'company_document_number' })
     companyDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'company_statute_attach', nullable: true })
-    companyStatuteAttach: string;
     @Column({ type: 'varchar', length: 255, name: 'email' })
     email: string;
-    @Column({ type: 'date', name: 'foundation_date' })
-    foundationDate: Date;
+    @Column({ type: 'varchar', name: 'foundation_date' })
+    foundationDate: string;
     @Column('varchar', { length: 20, name: 'person_type' })
     personType: string;
     @Column({ type: 'varchar', length: 100, name: 'address_street' })
@@ -54,16 +55,37 @@ export class EscrowAccountManager {
     nationality: string;
     @Column({ name: 'is_pep' })
     isPep: boolean;
-    @Column({ type: 'varchar', length: 11, name: 'individual_document_number' })
+    @Column({ type: 'varchar', name: 'individual_document_number' })
     individualDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach', nullable: true })
-    documentIdentificationAttach: string;
-    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach', nullable: true })
-    proofOfResidenceAttach: string;
     @Column({ type: 'varchar', length: 100, name: 'trading_name' })
     tradingName: string;
-    @Column({ type: 'varchar', length: 45, name: 'directors_election_minute', nullable: true })
-    directorsElectionMinute: string;
+
+    @Column({ type: 'mediumblob', name: 'document_identification_attach', nullable: true })
+    documentIdentificationAttach: Buffer;
+    @Column({ type: 'mediumblob', name: 'company_statute_attach', nullable: true })
+    companyStatuteAttach: Buffer;
+    @Column({ type: 'mediumblob', name: 'directors_election_minute_attach', nullable: true })
+    directorsElectionMinuteAttach: Buffer;
+    @Column({ type: 'mediumblob', name: 'proof_of_residence_attach', nullable: true })
+    proofOfResidenceAttach: Buffer;
+
+    @Column({ type: 'varchar', name: 'document_identification_attach_number', nullable: true })
+    documentIdentificationAttachNumber: string;
+    @Column({ type: 'varchar', name: 'company_statute_attach_number', nullable: true })
+    companyStatuteAttachNumber: string;
+    @Column({ type: 'varchar', name: 'directors_election_minute_attach_number', nullable: true })
+    directorsElectionMinuteAttachNumber: string;
+    @Column({ type: 'varchar', name: 'proof_of_residence_attach_number', nullable: true })
+    proofOfResidenceAttachNumber: string;
+    
+    @Column({ type: 'varchar', name: 'document_identification_attach_type_file', nullable: true })
+    documentIdentificationAttachTypeFile: string;
+    @Column({ type: 'varchar', name: 'company_statute_type_attach_file', nullable: true })
+    companyStatuteAttachTypeFile: string;
+    @Column({ type: 'varchar', name: 'directors_election_minute_attach_type_file', nullable: true })
+    directorsElectionMinuteAttachTypeFile: string;
+    @Column({ type: 'varchar', name: 'proof_of_residence_type_attach_file', nullable: true })
+    proofOfResidenceAttachTypeFile: string;
 
     @OneToMany(type => EscrowAccountManagerRepresentative, escrowAccountManagerRepresentative => escrowAccountManagerRepresentative.accountManager, {
         cascade: true,

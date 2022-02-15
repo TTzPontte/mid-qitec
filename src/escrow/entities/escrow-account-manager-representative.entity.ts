@@ -21,10 +21,8 @@ export class EscrowAccountManagerRepresentative {
     nationality: string;
     @Column({ name: 'is_pep' })
     isPep: boolean;
-    @Column({ type: 'varchar', length: 11, name: 'individual_document_number' })
+    @Column({ type: 'varchar', name: 'individual_document_number' })
     individualDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach', nullable: true })
-    documentIdentificationAttach: string;
     @Column({ type: 'varchar', length: 255, name: 'email' })
     email: string;
     @Column({ type: 'varchar', length: 3, name: 'phone_country_code' })
@@ -47,7 +45,20 @@ export class EscrowAccountManagerRepresentative {
     addressPostalCode: string;
     @Column({ type: 'varchar', length: 100, name: 'address_complement' })
     addressComplement: string;
-    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach', nullable: true })
-    proofOfResidenceAttach: string;
+
+    @Column({ type: 'mediumblob', name: 'proof_of_residence_attach', nullable: true })
+    proofOfResidenceAttach: Buffer;
+    @Column({ type: 'mediumblob', name: 'document_identification_attach', nullable: true })
+    documentIdentificationAttach: Buffer;
+
+    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach_number', nullable: true })
+    proofOfResidenceAttachNumber: string;
+    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach_number', nullable: true })
+    documentIdentificationAttachNumber: string;
+
+    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_Attach_type_file', nullable: true })
+    proofOfResidenceAttachTypeFile: string;
+    @Column({ type: 'varchar', length: 45, name: 'document_identification_Attach_type_file', nullable: true })
+    documentIdentificationAttachTypeFile: string;
 
 }

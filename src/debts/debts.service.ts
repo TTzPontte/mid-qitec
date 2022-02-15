@@ -1,22 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
-import { DebtDto } from "./dto/debt.dto";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DebtEntity } from "./entities/Debt.entity";
-import { FeeEntity } from "./entities/Fee.entity";
-import { AttachmentEntity } from "./entities/Attachment.entity";
-import { RelatedPartiesEntity } from "./entities/RelatedParties.entity";
-import { AdditionalDebtEntity } from "./entities/AdditionalDebt.entity";
-import { IncomeCompositionEntity } from "./entities/IncomeComposition.entity";
-import { DestinationAccountEntity } from "./entities/DestinationAccount.entity";
-import { InstallmentEntity } from "./entities/Installment.entity";
-import { RealEstateEntity } from "./entities/RealEstate.entity";
-import { DisbursementAccountEntity } from "./entities/DisbursementAccount.entity";
-import { FinancialEntity } from "./entities/Financial.entity";
 import config from "src/config/config";
 import { StatusEnum } from "src/escrow/enum/status";
-
+import { Repository } from "typeorm";
+import { DebtDto } from "./dto/debt.dto";
+import { AdditionalDebtEntity } from "./entities/AdditionalDebt.entity";
+import { AttachmentEntity } from "./entities/Attachment.entity";
+import { BorrowerEntity } from "./entities/Borrower.entity";
+import { DebtEntity } from "./entities/Debt.entity";
+import { DestinationAccountEntity } from "./entities/DestinationAccount.entity";
+import { DisbursementAccountEntity } from "./entities/DisbursementAccount.entity";
+import { FeeEntity } from "./entities/Fee.entity";
+import { FinancialEntity } from "./entities/Financial.entity";
+import { IncomeCompositionEntity } from "./entities/IncomeComposition.entity";
+import { InstallmentEntity } from "./entities/Installment.entity";
+import { RealEstateEntity } from "./entities/RealEstate.entity";
+import { RelatedPartiesEntity } from "./entities/RelatedParties.entity";
 const QITtech = require("qitech-wrapper");
+var base64 = require('base-64');
 
 @Injectable()
 export class DebtsService {
@@ -49,6 +50,10 @@ export class DebtsService {
 		private installmentRepository: Repository<InstallmentEntity>,
 		@InjectRepository(RealEstateEntity)
 		private realEstateRepository: Repository<RealEstateEntity>,
+
+		@InjectRepository(BorrowerEntity)
+		private borrowerRepository: Repository<BorrowerEntity>,
+
 		@InjectRepository(FinancialEntity)
 		private financialRepository: Repository<FinancialEntity>
 	) {
@@ -92,6 +97,62 @@ export class DebtsService {
 
 		let debt = new DebtEntity();
 		debt = Object.assign(debt, debtDto);
+
+		if (debtDto.borrower.weddingCertificate) {
+			var arrayOfStrings = debtDto.borrower.weddingCertificate.split(",");
+			debt.borrower.weddingCertificate = Buffer.from(arrayOfStrings[1], "base64");
+			let type = arrayOfStrings[0].match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)
+				if (type)
+			debt.borrower.weddingCertificateAttachTypeFile = type[0].split("/")[1];
+		}
+
+		if (debtDto.borrower.documentIdentification) {
+			var arrayOfStrings = debtDto.borrower.documentIdentification.split(",");
+			debt.borrower.documentIdentification = Buffer.from(arrayOfStrings[1], "base64");
+			let type = arrayOfStrings[0].match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)
+			if (type)
+				debt.borrower.documentIdentificationAttachTypeFile = type[0].split("/")[1];
+		}
+
+		if (debtDto.borrower.proofOfResidence) {
+			var arrayOfStrings = debtDto.borrower.proofOfResidence.split(",");
+			debt.borrower.proofOfResidence = Buffer.from(arrayOfStrings[1], "base64");
+
+			let type = arrayOfStrings[0].match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)
+			if (type)
+				debt.borrower.proofOfResidenceAttachTypeFile = type[0].split("/")[1];
+		}
+
+		if (debtDto.relatedParties) {
+			let relatedPartie;
+			debtDto.relatedParties.forEach(element => {
+
+				relatedPartie = new RelatedPartiesEntity();
+				relatedPartie = Object.assign(relatedPartie, element);
+
+
+				if (element.weddingCertificate) {
+					var arrayOfStrings = element.weddingCertificate.split(",");
+					// var bytes = base64.decode(arrayOfStrings[1]);
+					relatedPartie.weddingCertificate = Buffer.from(arrayOfStrings[1], "base64");;
+				}
+
+				if (element.documentIdentification) {
+					var arrayOfStrings = element.documentIdentification.split(",");
+					// var bytes = base64.decode(arrayOfStrings[1]);
+					relatedPartie.documentIdentification = Buffer.from(arrayOfStrings[1], "base64");;
+				}
+
+				if (element.proofOfResidence) {
+					var arrayOfStrings = element.proofOfResidence.split(",");
+					// var bytes = base64.decode(arrayOfStrings[1]);
+					relatedPartie.proofOfResidence = Buffer.from(arrayOfStrings[1], "base64");;
+				}
+	
+			});
+			debt.relatedParties.push(relatedPartie);
+		}
+
 		for (const key of this.relatedKeys) {
 			const list = debtDto[key] || [];
 			const repo = this.relations[key];
@@ -152,4 +213,8 @@ export class DebtsService {
 		const qitechResponse = await this.qitech_wrapper.debt.post(createQitechDto);
 		return qitechResponse;
 	}
+
+	async updateBorrower(borrower: BorrowerEntity) {
+		await this.borrowerRepository.save(borrower);
+	  }
 }

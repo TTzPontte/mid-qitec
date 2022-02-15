@@ -21,5 +21,7 @@ export class EscrowDto {
     auditList: EscrowAuditDto[];
     accountManager: EscrowAccountManagerDto;
     accountOwner: EscrowAccountOwnerDto;
+    documentIdentificationAttach: Buffer;
+    proofOfResidenceAttach: Buffer;
 
 }

@@ -9,7 +9,7 @@ export class EscrowAccountOwner {
     @OneToOne(() => Escrow, (escrow: Escrow) => escrow.accountOwner, {
     })
     escrow: Escrow;
-    @Column({ type: 'varchar', length: 2, name: 'type' })
+    @Column({ type: 'varchar', name: 'type' })
     type: string;
     @Column({ type: 'varchar', length: 100, name: 'name' })
     name: string;
@@ -17,14 +17,12 @@ export class EscrowAccountOwner {
     cnaeCode: string;
     @Column({ type: 'varchar', length: 14, name: 'company_document_number' })
     companyDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'company_statute_attach', nullable: true })
-    companyStatuteAttach: string;
-    @Column({ type: 'varchar', length: 5000, name: 'company_statute_attach_base64', nullable: true })
-    companyStatuteAttachBase64: string;
+    @Column({ type: 'mediumblob',  name: 'company_statute_attach', nullable: true })
+    companyStatuteAttach: Buffer;
     @Column({ type: 'varchar', length: 255, name: 'email' })
     email: string;
-    @Column({ type: 'date', name: 'foundation_date' })
-    foundationDate: Date;
+    @Column({ type: 'varchar', name: 'foundation_date' })
+    foundationDate: string;
     @Column({ type: 'varchar', length: 20, name: 'person_type' })
     personType: string;
     @Column({ type: 'varchar', length: 100, name: 'address_street' })
@@ -55,15 +53,25 @@ export class EscrowAccountOwner {
     nationality: string;
     @Column({ name: 'is_pep' })
     isPep: boolean;
-    @Column({ type: 'varchar', length: 11, name: 'individual_document_number' })
+    @Column({ type: 'varchar', name: 'individual_document_number' })
     individualDocumentNumber: string;
-    @Column({ type: 'varchar', length: 45, name: 'document_identification_attach', nullable: true })
-    documentIdentificationAttach: string;
-    @Column({ type: 'varchar', length: 45, name: 'proof_of_residence_attach', nullable: true })
-    proofOfResidenceAttach: string;
+    @Column({ type: 'mediumblob', name: 'document_identification_attach', nullable: true })
+    documentIdentificationAttach: Buffer;
+    @Column({ type: 'mediumblob', name: 'proof_of_residence_attach', nullable: true })
+    proofOfResidenceAttach: Buffer;
 
-    @Column({ type: 'varchar', length: 5000, name: 'document_identification_attach_base64', nullable: true })
-    documentIdentificationAttachBase64: string;
-    @Column({ type: 'varchar', length: 5000, name: 'proof_of_residence_attach_base64', nullable: true })
-    proofOfResidenceAttachBase64: string;
+    @Column({ type: 'varchar', name: 'document_identification_attach_number', nullable: true })
+    documentIdentificationAttachNumber: string;
+    @Column({ type: 'varchar', name: 'proof_of_residence_attach_number', nullable: true })
+    proofOfResidenceAttachNumber: string;
+    @Column({ type: 'varchar', name: 'company_statute_attach_number', nullable: true })
+    companyStatuteAttachNumber: string;
+
+    @Column({ type: 'varchar', name: 'document_identification_attach_type_file', nullable: true })
+    documentIdentificationAttachTypeFile: string;
+    @Column({ type: 'varchar', name: 'proof_of_residence_attach_type_file', nullable: true })
+    proofOfResidenceAttachTypeFile: string;
+    @Column({ type: 'varchar', name: 'company_statute_attach_type_file', nullable: true })
+    companyStatuteAttachTypeFile: string;
+
 }

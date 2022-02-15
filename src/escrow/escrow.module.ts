@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DebtsService } from 'src/debts/debts.service';
+import { DebtValidator } from 'src/debts/debts.validator';
 import { AdditionalDebtEntity } from 'src/debts/entities/AdditionalDebt.entity';
 import { AttachmentEntity } from 'src/debts/entities/Attachment.entity';
 import { BorrowerEntity } from 'src/debts/entities/Borrower.entity';
@@ -22,14 +23,23 @@ import { EscrowAudit } from 'src/escrow/entities/escrow-audit.entity';
 import { EscrowSigner } from 'src/escrow/entities/escrow-signer.entity';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { PontteContract } from 'src/pontte-contract/entites/pontte-contract.entity';
+import { PontteContractController } from 'src/pontte-contract/pontte-contract.controller';
 import { PontteContractService } from 'src/pontte-contract/pontte-contract.service';
+import { PontteContractValidator } from 'src/pontte-contract/pontte-contract.validator';
 import { QitechService } from 'src/qitech/qitech.service';
 import { Escrow } from './entities/escrow.entity';
 import { EscrowController } from './escrow.controller';
 import { EscrowService } from './escrow.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner,DebtEntity,
+  imports: [TypeOrmModule.forFeature([Escrow, 
+    EscrowAccountDestination, 
+    EscrowAudit,
+    EscrowAccountManager, 
+    EscrowAccountOwner, 
+    EscrowAccountManagerRepresentative, 
+    EscrowSigner,
+    DebtEntity,
     DestinationAccountEntity,
     AdditionalDebtEntity,
     AttachmentEntity,
@@ -41,8 +51,9 @@ import { EscrowService } from './escrow.service';
     RePossessionCompositionEntity,
     RealEstateEntity,
     RelatedPartiesEntity,
-    IncomeCompositionEntity,PontteContract])],
-  controllers: [EscrowController],
-  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService,DebtsService]
+    IncomeCompositionEntity,
+    PontteContract])],
+  controllers: [EscrowController, PontteContractController],
+  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService, DebtsService, PontteContractValidator, DebtValidator]
 })
 export class EscrowModule { }

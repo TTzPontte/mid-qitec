@@ -44,7 +44,7 @@ export class RelatedPartiesEntity {
   motherName: string | null;
 
   @Column({ name: "birth_date" })
-  birthDate: string | null;
+  birthDate: Date | null;
 
   @Column({ name: "profession" })
   profession: string | null;
@@ -70,14 +70,14 @@ export class RelatedPartiesEntity {
   @Column({ name: "spouse" })
   spouse: string | null;
 
-  @Column({ name: "wedding_certificate" })
-  weddingCertificate: string | null;
+  @Column({ name: "wedding_certificate", type: "mediumblob", nullable: true, }, )
+  weddingCertificate: Buffer | null;
 
-  @Column({ name: "document_identification" })
-  documentIdentification: string | null;
+  @Column({ name: "document_identification", type: "mediumblob", nullable: true })
+  documentIdentification: Buffer | null;
 
-  @Column({ name: "proof_of_residence" })
-  proofOfResidence: string | null;
+  @Column({ name: 'proof_of_residence', type: "mediumblob", nullable: true })
+  proofOfResidence: Buffer | null;
 
   @Column({ name: "address_city" })
   addressCity: string | null;

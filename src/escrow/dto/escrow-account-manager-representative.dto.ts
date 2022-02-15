@@ -11,7 +11,7 @@ export class EscrowAccountManagerRepresentativeDto {
     nationality: string;
     isPep: number;
     individualDocumentNumber: string;
-    documentIdentificationAttach: string;
+    
     email: string;
     phoneCountryCode: string;
     phoneAreaCode: string;
@@ -23,5 +23,7 @@ export class EscrowAccountManagerRepresentativeDto {
     addressNumber: string;
     addressPostalCode: string;
     addressComplement: string;
-    proofOfResidenceAttach: string;
+
+    proofOfResidence: string;
+    documentIdentification: string;
 }

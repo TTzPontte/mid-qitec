@@ -6,10 +6,11 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import {Blob} from 'buffer';
 import { DebtEntity } from "./Debt.entity";
 
 // @Index("address", ["address"], {})
-@Entity("individual", { schema: "pontte_escrow" })
+@Entity()
 export class BorrowerEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -51,7 +52,7 @@ export class BorrowerEntity {
   motherName: string | null;
 
   @Column({ name: "birth_date" })
-  birthDate: string | null;
+  birthDate: Date | null;
 
   @Column({ name: "profession" })
   profession: string | null;
@@ -77,14 +78,34 @@ export class BorrowerEntity {
   @Column({ name: "spouse" })
   spouse: string | null;
 
-  @Column({ name: "wedding_certificate" })
-  weddingCertificate: string | null;
+  @Column({ name: "wedding_certificate", type: "mediumblob", nullable: true, }, )
+  weddingCertificate: Buffer | null;
 
-  @Column({ name: "document_identification" })
-  documentIdentification: string | null;
+  @Column({ name: "document_identification", type: "mediumblob", nullable: true })
+  documentIdentification: Buffer | null;
 
-  @Column({ name: "proof_of_residence" })
-  proofOfResidence: string | null;
+  @Column({ name: 'proof_of_residence', type: "mediumblob", nullable: true })
+  proofOfResidence: Buffer | null;
+
+
+  @Column({ type: 'varchar', name: 'wedding_Certificate_Attach_Number', nullable: true })
+  weddingCertificateAttachNumber: string;
+
+  @Column({ type: 'varchar', name: 'document_Identification_Attach_Number', nullable: true })
+  documentIdentificationAttachNumber: string;
+
+  @Column({ type: 'varchar', name: 'proof_Of_Residence_Attach_Number', nullable: true })
+  proofOfResidenceAttachNumber: string;
+
+  @Column({ type: 'varchar', name: 'wedding_Certificate_Attach_Type_File', nullable: true })
+  weddingCertificateAttachTypeFile: string;
+
+  @Column({ type: 'varchar', name: 'document_IdentificationAttach_Type_File', nullable: true })
+  documentIdentificationAttachTypeFile: string;
+
+  @Column({ type: 'varchar', name: 'proof_Of_Residence_Attach_Type_File', nullable: true })
+  proofOfResidenceAttachTypeFile: string;
+
 
   @Column({ name: "address_city" })
   addressCity: string | null;

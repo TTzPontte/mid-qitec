@@ -8,9 +8,9 @@ export class EscrowAccountOwnerDto {
     name: string;
     cnaeCode: string;
     companyDocumentNumber: string;
-    companyStatuteAttach: string;
+    companyStatuteAttach: Buffer;
     email: string;
-    foundationDate: Date;
+    foundationDate: string;
     personType: string;
     addressStreet: string;
     addressState: string;
@@ -27,6 +27,9 @@ export class EscrowAccountOwnerDto {
     nationality: string;
     isPep: number;
     individualDocumentNumber: string;
-    documentIdentificationAttach: string;
-    proofOfResidenceAttach: string;
+    documentIdentificationAttach: Buffer;
+    proofOfResidenceAttach: Buffer;
+
+    proofOfResidenceAttachTypeFile: string;
+    documentIdentificationAttachTypeFile: string;
 }

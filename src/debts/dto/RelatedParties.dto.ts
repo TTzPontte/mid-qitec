@@ -12,7 +12,7 @@ export class RelatedPartiesDto {
   phone: string | null;
   tradingName: string | null;
   motherName: string | null;
-  birthDate: string | null;
+  birthDate: Date | null;
   profession: string | null;
   nationality: string | null;
   maritalStatus: string | null;

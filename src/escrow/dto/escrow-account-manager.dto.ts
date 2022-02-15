@@ -10,9 +10,9 @@ export class EscrowAccountManagerDto {
     name: string;
     cnaeCode: string;
     companyDocumentNumber: string;
-    companyStatuteAttach: string;
+    
     email: string;
-    foundationDate: Date;
+    foundationDate: string;
     personType: string;
     addressStreet: string;
     addressState: string;
@@ -30,7 +30,13 @@ export class EscrowAccountManagerDto {
     tradingName: string;
     isPep: number;
     individualDocumentNumber: string;
-    documentIdentificationAttach: string;
-    proofOfResidenceAttach: string;
+
+    documentIdentification: string;
+    directorsElectionMinute: string;
+    proofOfResidence: string;
+    companyStatute: string;
+
+
+    
     accountManagerRepresentativeList: EscrowAccountManagerRepresentativeDto[];
 }

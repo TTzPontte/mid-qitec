@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DebtsService } from 'src/debts/debts.service';
+import { DebtValidator } from 'src/debts/debts.validator';
 import { AdditionalDebtEntity } from 'src/debts/entities/AdditionalDebt.entity';
 import { AttachmentEntity } from 'src/debts/entities/Attachment.entity';
 import { BorrowerEntity } from 'src/debts/entities/Borrower.entity';
@@ -28,9 +29,17 @@ import { QitechService } from 'src/qitech/qitech.service';
 import { PontteContract } from './entites/pontte-contract.entity';
 import { PontteContractController } from './pontte-contract.controller';
 import { PontteContractService } from './pontte-contract.service';
+import { PontteContractValidator } from './pontte-contract.validator';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Escrow, EscrowAccountDestination, EscrowAudit, EscrowAccountManager, EscrowAccountOwner, EscrowAccountManagerRepresentative, EscrowSigner, DebtEntity,
+  imports: [TypeOrmModule.forFeature([Escrow, 
+    EscrowAccountDestination, 
+    EscrowAudit, 
+    EscrowAccountManager, 
+    EscrowAccountOwner, 
+    EscrowAccountManagerRepresentative, 
+    EscrowSigner,
+    DebtEntity,
     DestinationAccountEntity,
     AdditionalDebtEntity,
     AttachmentEntity,
@@ -45,7 +54,7 @@ import { PontteContractService } from './pontte-contract.service';
     IncomeCompositionEntity,
   PontteContract])],
   controllers: [PontteContractController],
-  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService, ConfigService, DebtsService]
+  providers: [QitechService, EscrowService, PontteContractService, GoogleDriveService, ConfigService, DebtsService, DebtValidator, PontteContractValidator]
 })
 export class PontteContractModule {
 

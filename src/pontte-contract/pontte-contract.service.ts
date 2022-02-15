@@ -4,7 +4,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { DebtsService } from 'src/debts/debts.service';
 import { DebtDto } from 'src/debts/dto/debt.dto';
 import { DebtEntity } from 'src/debts/entities/Debt.entity';
+import { EscrowAccountManagerDto } from 'src/escrow/dto/escrow-account-manager.dto';
+import { EscrowAccountManager } from 'src/escrow/entities/escrow-account-manager.entity';
 import { Escrow } from 'src/escrow/entities/escrow.entity';
+import { ManagerStatusEnum } from 'src/escrow/enum/manager-status';
 import { StatusEnum } from 'src/escrow/enum/status';
 import { EscrowService } from 'src/escrow/escrow.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
@@ -21,8 +24,8 @@ export class PontteContractService {
   constructor(
     @InjectRepository(PontteContract)
     private pontteRepository: Repository<PontteContract>,
-    private readonly escrowService: EscrowService,
     private readonly qitechService: QitechService,
+    private readonly escrowService: EscrowService,
     private readonly googleDriveService: GoogleDriveService,
     private readonly configService: ConfigService,
     private readonly debtsService: DebtsService
@@ -52,9 +55,14 @@ export class PontteContractService {
 
     let debt2 = await this.debtsService.findOne(debt.id);
 
+    this.uploadDocumentDebt(debt2);//VALIDAR
+
+    //updateDocumentos
+
     let resp = await this.qitechService.createDebt(debt2);
     console.log('createDebtQiTech');
     console.log(resp);
+
     let { data } = resp;
 
     if (data) {
@@ -64,11 +72,20 @@ export class PontteContractService {
       console.log(data);
       debt.status = StatusEnum.REVIEW;
       await this.debtsService.updateDebt(debt2);
+      return true;
     }
   }
 
 
   async initializeContract() {
+
+    ///validar se existe manager cadastrado
+    let accountManager = await this.escrowService.findManagerByStatus(ManagerStatusEnum.ACTIVE);
+    if (!accountManager) {
+      return "Manager not found.";
+    }
+
+
     const listPontteContractPending = await this.findListByStatus(StatusEnum.NEW);
     console.log(listPontteContractPending);
     await Promise.all(listPontteContractPending.map(async (contract) => {
@@ -79,12 +96,13 @@ export class PontteContractService {
       console.log("contract.debt");
       console.log(contract.debt);
 
-      await this.createEscrowAccountQiTech(contract.escrow);
-      // await this.createDebtQiTech(contract.debt);
-      //validar retorno antes de salvar
-      contract.status = StatusEnum.REVIEW;
-      contract.updateDate = new Date();
-      this.updateContract(contract);
+      if (await this.createEscrowAccountQiTech(contract.escrow)) {
+        // await this.createDebtQiTech(contract.debt);
+        //validar retorno antes de salvar
+        contract.status = StatusEnum.REVIEW;
+        contract.updateDate = new Date();
+        this.updateContract(contract);
+      };
 
     }))
   }
@@ -100,7 +118,7 @@ export class PontteContractService {
 
       let escrowRequest = {
         destination_list: this.getDestinationList(escrowPending),
-        account_manager: this.getAccountManagerList(escrowPending),
+        account_manager: await this.getAccountManagerList(),
         account_owner: this.getAccountOwner(escrowPending),
       }
 
@@ -110,7 +128,7 @@ export class PontteContractService {
         escrowRequest['allowed_User'] = allowed_User;
       }
 
-      let resp = await this.qitechService.createAccount(escrowRequest);//testar com dados reais
+      let resp = await this.qitechService.createAccount(escrowRequest);
       //validar response
       //salvar se deu bom
       console.log('validateDocumentOk');
@@ -121,18 +139,20 @@ export class PontteContractService {
         console.log(data);
         escrowPending.accountBranch = data.account_info.account_branch;
         escrowPending.accountNumber = data.account_info.account_number;
+        escrowPending.financialInstitutionCode = data.account_info.financial_institution_code;
         //digito
         escrowPending.status = StatusEnum.REVIEW;
         this.escrowService.updateEscrow(escrowPending);
+        return true;
       }
 
     }
-
+    return false;
   }
 
   getDestinationList(escrow) {
     let destination_list = [];
-    escrow.escrowAccountDestinationList.forEach(e => {
+    escrow.destinationAccounts.forEach(e => {
       destination_list.push({
         "account_branch": e.accountBranch,
         "account_digit": e.accountDigit,
@@ -146,9 +166,9 @@ export class PontteContractService {
   }
 
   getAccountOwner(escrow) {
-    if (escrow.escrowAccountOwner.type == "PF") {
+    if (escrow.accountOwner.type == "natural") {
       return this.getAccountOwnerPF(escrow);
-    } else if (escrow.escrowAccountOwner.type == "PJ") {
+    } else if (escrow.accountOwner.type == "PJ") {
       return this.getAccountOwnerPJ(escrow);
     }
 
@@ -157,29 +177,29 @@ export class PontteContractService {
   getAccountOwnerPF(escrow) {
     return {
       "address": {
-        "city": escrow.escrowAccountOwner.addressCity,
-        "complement": escrow.escrowAccountOwner.addressComplement,
-        "neighborhood": escrow.escrowAccountOwner.addressNeighborhood,
-        "number": escrow.escrowAccountOwner.addressNumber,
-        "postal_code": escrow.escrowAccountOwner.addressPostalCode,
-        "state": escrow.escrowAccountOwner.addressState,
-        "street": escrow.escrowAccountOwner.addressStreet
+        "city": escrow.accountOwner.addressCity,
+        "complement": escrow.accountOwner.addressComplement,
+        "neighborhood": escrow.accountOwner.addressNeighborhood,
+        "number": escrow.accountOwner.addressNumber,
+        "postal_code": escrow.accountOwner.addressPostalCode,
+        "state": escrow.accountOwner.addressState,
+        "street": escrow.accountOwner.addressStreet
       },
-      "birth_date": dateFormat(escrow.escrowAccountOwner.birthDate, "yyyy-mm-dd"),
-      "document_identification": escrow.escrowAccountOwner.documentIdentificationAttach,
-      "email": escrow.escrowAccountOwner.email,
-      "individual_document_number": escrow.escrowAccountOwner.individualDocumentNumber,
-      "is_pep": escrow.escrowAccountOwner.isPep,
-      "mother_name": escrow.escrowAccountOwner.motherName,
-      "name": escrow.escrowAccountOwner.name,
-      "nationality": escrow.escrowAccountOwner.nationality,
-      "person_type": escrow.escrowAccountOwner.personType,
+      "birth_date": dateFormat(escrow.accountOwner.birthDate, "yyyy-mm-dd"),
+      "document_identification": escrow.accountOwner.documentIdentificationAttachNumber,
+      "email": escrow.accountOwner.email,
+      "individual_document_number": escrow.accountOwner.individualDocumentNumber.replace(/[^0-9]+/g, ""),
+      "is_pep": escrow.accountOwner.isPep,
+      "mother_name": escrow.accountOwner.motherName,
+      "name": escrow.accountOwner.name,
+      "nationality": escrow.accountOwner.nationality,
+      "person_type": escrow.accountOwner.personType,
       "phone": {
-        "country_code": escrow.escrowAccountOwner.phoneCountryCode,
-        "area_code": escrow.escrowAccountOwner.phoneAreaCode,
-        "number": escrow.escrowAccountOwner.phoneNumber
+        "country_code": escrow.accountOwner.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+        "area_code": escrow.accountOwner.phoneAreaCode,
+        "number": escrow.accountOwner.phoneNumber.replace(/[^0-9]+/g, "")
       },
-      "proof_of_residence": escrow.escrowAccountOwner.proofOfResidenceAttach
+      "proof_of_residence": escrow.accountOwner.proofOfResidenceAttachNumber
     }
 
   }
@@ -187,7 +207,7 @@ export class PontteContractService {
   getAccountOwnerPJ(escrow) {
 
     let company_representatives = [];
-    escrow.escrowAccountManager.escrowAccountManagerRepresentativeList.forEach(e => {
+    escrow.accountManager.accountManagerRepresentativeList.forEach(e => {
 
       company_representatives.push({
         "address": {
@@ -202,7 +222,7 @@ export class PontteContractService {
         "birth_date": dateFormat(e.birthDate, "yyyy-mm-dd"),
         "document_identification": e.documentIdentificationAttach,
         "email": e.email,
-        "individual_document_number": e.individualDocumentNumber,
+        "individual_document_number": e.individualDocumentNumber.replace(/[^0-9]+/g, ""),
         "is_pep": e.isPep,
         "mother_name": e.motherName,
         "name": e.name,
@@ -210,8 +230,8 @@ export class PontteContractService {
         "person_type": e.personType,
         "phone": {
           "area_code": e.phoneAreaCode,
-          "country_code": e.phoneCountryCode,
-          "number": e.phoneNumber
+          "country_code": e.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+          "number": e.phoneNumber.replace(/[^0-9]+/g, "")
         },
         "proof_of_residence": e.proofOfResidenceAttach
       });
@@ -220,45 +240,45 @@ export class PontteContractService {
 
     return {
       "address": {
-        "city": escrow.escrowAccountOwner.addressCity,
-        "complement": escrow.escrowAccountOwner.addressComplement,
-        "neighborhood": escrow.escrowAccountOwner.addressNeighborhood,
-        "number": escrow.escrowAccountOwner.addressNumber,
-        "postal_code": escrow.escrowAccountOwner.addressPostalCode,
-        "state": escrow.escrowAccountOwner.addressState,
-        "street": escrow.escrowAccountOwner.addressStreet
+        "city": escrow.accountOwner.addressCity,
+        "complement": escrow.accountOwner.addressComplement,
+        "neighborhood": escrow.accountOwner.addressNeighborhood,
+        "number": escrow.accountOwner.addressNumber,
+        "postal_code": escrow.accountOwner.addressPostalCode,
+        "state": escrow.accountOwner.addressState,
+        "street": escrow.accountOwner.addressStreet
       },
-      "cnae_code": escrow.escrowAccountOwner.cnaeCode,
-      "company_document_number": escrow.escrowAccountOwner.companyDocumentNumber,
+      "cnae_code": escrow.accountOwner.cnaeCode,
+      "company_document_number": escrow.accountOwner.companyDocumentNumber,
       "company_representatives": company_representatives,
-      "company_statute": escrow.escrowAccountOwner.companyStatute,
-      "directors_election_minute": escrow.escrowAccountOwner.directorsElectionMinute,
-      "email": escrow.escrowAccountOwner.email,
-      "foundation_date": dateFormat(escrow.escrowAccountOwner.foundationDate, "yyyy-mm-dd"),
-      "name": escrow.escrowAccountOwner.name,
-      "person_type": escrow.escrowAccountOwner.personType,
+      "company_statute": escrow.accountOwner.companyStatute,
+      "directors_election_minute": escrow.accountOwner.directorsElectionMinute,
+      "email": escrow.accountOwner.email,
+      "foundation_date": dateFormat(escrow.accountOwner.foundationDate, "yyyy-mm-dd"),
+      "name": escrow.accountOwner.name,
+      "person_type": escrow.accountOwner.personType,
       "phone": {
-        "area_code": escrow.escrowAccountOwner.phoneAreaCode,
-        "country_code": escrow.escrowAccountOwner.phoneCountryCode,
-        "number": escrow.escrowAccountOwner.phoneNumber
+        "area_code": escrow.accountOwner.phoneAreaCode,
+        "country_code": escrow.accountOwner.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+        "number": escrow.accountOwner.phoneNumber.replace(/[^0-9]+/g, "")
       },
-      "trading_name": escrow.escrowAccountOwner.tradingName
+      "trading_name": escrow.accountOwner.tradingName
     }
 
   }
 
   getAllowedUser(escrow) {
 
-    if (escrow.escrowAccountOwner.type == "PJ") {
+    if (escrow.accountOwner.type == "PJ") {
       return {
-        "email": escrow.escrowAccountManager.email,
-        "individual_document_number": escrow.escrowAccountManager.individualDocumentNumber,
-        "name": escrow.escrowAccountManager.name,
-        "person_type": escrow.escrowAccountManager.personType,
+        "email": escrow.accountManager.email,
+        "individual_document_number": escrow.accountManager.individualDocumentNumber.replace(/[^0-9]+/g, ""),
+        "name": escrow.accountManager.name,
+        "person_type": escrow.accountManager.personType,
         "phone": {
-          "area_code": escrow.escrowAccountManager.phoneAreaCode,
-          "country_code": escrow.escrowAccountManager.phoneCountryCode,
-          "number": escrow.escrowAccountManager.phoneNumber
+          "area_code": escrow.accountManager.phoneAreaCode,
+          "country_code": escrow.accountManager.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+          "number": escrow.accountManager.phoneNumber.replace(/[^0-9]+/g, "")
         }
       }
     } else {
@@ -266,23 +286,25 @@ export class PontteContractService {
     }
   }
 
-  getAccountManagerList(escrow) {
+  async getAccountManagerList() {
+    let accountManager = await this.escrowService.findManagerByStatus(ManagerStatusEnum.ACTIVE);
+    //buscar manager na base
     let company_representatives = [];
-    escrow.escrowAccountManager.escrowAccountManagerRepresentativeList.forEach(e => {
+    accountManager.accountManagerRepresentativeList.forEach(e => {
       company_representatives.push({
         "address": {
           "city": e.addressCity,
           "complement": e.addressComplement,
           "neighborhood": e.addressNeighborhood,
           "number": e.addressNumber,
-          "postal_code": e.addressPostalCode,
+          "postal_code": e.addressPostalCode.replace(/[^0-9]+/g, ""),
           "state": e.addressState,
           "street": e.addressStreet
         },
         "birth_date": dateFormat(e.birthDate, "yyyy-mm-dd"),
-        "document_identification": e.documentIdentificationAttach,
+        "document_identification": e.documentIdentificationAttachNumber,
         "email": e.email,
-        "individual_document_number": e.individualDocumentNumber,
+        "individual_document_number": e.individualDocumentNumber.replace(/[^0-9]+/g, ""),
         "is_pep": e.isPep,
         "mother_name": e.motherName,
         "name": e.name,
@@ -290,38 +312,48 @@ export class PontteContractService {
         "person_type": e.personType,
         "phone": {
           "area_code": e.phoneAreaCode,
-          "country_code": e.phoneCountryCode,
-          "number": e.phoneNumber
+          "country_code": e.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+          "number": e.phoneNumber.replace(/[^0-9]+/g, "")
         },
-        "proof_of_residence": e.proofOfResidenceAttach
+        "proof_of_residence": e.proofOfResidenceAttachNumber
       });
 
     });
     return {
       "address": {
-        "city": escrow.escrowAccountManager.addressCity,
-        "complement": escrow.escrowAccountManager.addressComplement,
-        "neighborhood": escrow.escrowAccountManager.addressNeighborhood,
-        "number": escrow.escrowAccountManager.addressNumber,
-        "postal_code": escrow.escrowAccountManager.addressPostalCode,
-        "state": escrow.escrowAccountManager.addressState,
-        "street": escrow.escrowAccountManager.addressStreet
+        "city": accountManager.addressCity,
+        "complement": accountManager.addressComplement,
+        "neighborhood": accountManager.addressNeighborhood,
+        "number": accountManager.addressNumber,
+        "postal_code": accountManager.addressPostalCode,
+        "state": accountManager.addressState,
+        "street": accountManager.addressStreet
       },
-      "cnae_code": escrow.escrowAccountManager.cnaeCode,
-      "company_document_number": escrow.escrowAccountManager.companyDocumentNumber,
+      "cnae_code": accountManager.cnaeCode,
+      "company_document_number": accountManager.companyDocumentNumber,
       "company_representatives": company_representatives,
-      "company_statute": escrow.escrowAccountManager.companyStatuteAttach,
-      "directors_election_minute": escrow.escrowAccountManager.directorsElectionMinute,
-      "email": escrow.escrowAccountManager.email,
-      "foundation_date": dateFormat(escrow.escrowAccountManager.foundationDate, "yyyy-mm-dd"),
-      "name": escrow.escrowAccountManager.name,
-      "person_type": escrow.escrowAccountManager.personType,
+      "company_statute": accountManager.companyStatuteAttachNumber,
+      "directors_election_minute": accountManager.directorsElectionMinuteAttachNumber,
+      "email": accountManager.email,
+      "foundation_date": dateFormat(accountManager.foundationDate, "yyyy-mm-dd"),
+      "name": accountManager.name,
+      "person_type": accountManager.personType,
       "phone": {
-        "area_code": escrow.escrowAccountManager.phoneAreaCode,
-        "country_code": escrow.escrowAccountManager.phoneCountryCode,
-        "number": escrow.escrowAccountManager.phoneNumber
+        "area_code": accountManager.phoneAreaCode,
+        "country_code": accountManager.phoneCountryCode.replace(/[^0-9]+/g, "0"),
+        "number": accountManager.phoneNumber.replace(/[^0-9]+/g, "")
       },
-      "trading_name": escrow.escrowAccountManager.tradingName
+      "trading_name": accountManager.tradingName,
+      // --
+      // "mother_name":"Maria Mariane",
+      // "birth_date": "2001-01-01",
+      "birth_date": dateFormat(accountManager.birthDate, "yyyy-mm-dd"),
+      "document_identification": "3caa440e-6b4f-4567-90e2-32a9c3ee7bb0",
+      "individual_document_number": "08141163701",
+      "is_pep": false,
+      "mother_name": accountManager.motherName,
+      "nationality": accountManager.nationality,
+      "proof_of_residence": "3caa440e-6b4f-4567-90e2-32a9c3ee7bb0"
 
     }
 
@@ -331,22 +363,21 @@ export class PontteContractService {
 
     let documentOk = true;
 
-    if (!escrow.accountOwner.companyStatuteAttach) documentOk = false;
-    if (!escrow.accountOwner.proofOfResidenceAttach) documentOk = false;
-    // if (!escrow.escrowAccountOwner.directorsElectionMinute) documentOk = false;
-
-    if (escrow.accountOwner.type == "PF") {//VERIFICAR SE VAI PRECISAR FAZER UPLOAD DOS DOCUMENTOS PARA ACCOUNT MANAGER VISTO Q ESTARA FIXO EM UM ARQUIVO DE CONFIG
-      if (!escrow.accountOwner.documentIdentificationAttach) documentOk = false;
-      if (!escrow.accountOwner.proofOfResidenceAttach) documentOk = false;
+    if (escrow.accountOwner.type == "natural") {//VERIFICAR SE VAI PRECISAR FAZER UPLOAD DOS DOCUMENTOS PARA ACCOUNT MANAGER VISTO Q ESTARA FIXO EM UM ARQUIVO DE CONFIG
+      if (!escrow.accountOwner.documentIdentificationAttachNumber) documentOk = false;
+      if (!escrow.accountOwner.proofOfResidenceAttachNumber) documentOk = false;
     } else if (escrow.accountOwner.type == "PJ") {
-      //pj
+
+
       if (!escrow.accountOwner.companyStatuteAttach) documentOk = false;
       if (!escrow.accountOwner.directorsElectionMinute) documentOk = false;
-      escrow.accountOwner.escrowAccountManagerRepresentativeList.forEach(accountManagerRepresentative => {
+      escrow.accountOwner.accountManagerRepresentativeList.forEach(accountManagerRepresentative => {
         if (!accountManagerRepresentative.documentIdentificationAttach) documentOk = false;
         if (!accountManagerRepresentative.proofOfResidenceAttach) documentOk = false;
 
       })
+    } else {
+      documentOk = false;
     }
 
     return documentOk;
@@ -358,187 +389,62 @@ export class PontteContractService {
 
     //buscar scrowAccontOwner
     console.log("uploadDocument")
-    if (escrow.accountOwner.proofOfResidenceAttachBase64) {
-      escrow.accountOwner.proofOfResidenceAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.proofOfResidenceAttachBase64);
-      console.log(escrow.accountOwner.proofOfResidenceAttach);
+    if (escrow.accountOwner.proofOfResidenceAttach && !escrow.accountOwner.proofOfResidenceAttachNumber) {
+      escrow.accountOwner.proofOfResidenceAttachNumber = await this.uploadDocumentQiTech("accountOwner", escrow.accountOwner.proofOfResidenceAttach, escrow.accountOwner.proofOfResidenceAttachTypeFile);
+      console.log(escrow.accountOwner.proofOfResidence);
     }
-    if (escrow.accountOwner.documentIdentificationAttachBase64) {
-      escrow.accountOwner.documentIdentificationAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.documentIdentificationAttachBase64);
+    if (escrow.accountOwner.documentIdentificationAttach && !escrow.accountOwner.documentIdentificationAttachNumber) {
+      escrow.accountOwner.documentIdentificationAttachNumber = await this.uploadDocumentQiTech("accountOwner", escrow.accountOwner.documentIdentificationAttach, escrow.accountOwner.documentIdentificationAttachTypeFile);
     }
-    if (escrow.accountOwner.companyStatuteAttachBase64) {
-      escrow.accountOwner.companyStatuteAttach = await this.uploadDocumentQiTech("accountOwner",escrow.accountOwner.companyStatuteAttachBase64);
+    if (escrow.accountOwner.companyStatuteAttach && !escrow.accountOwner.companyStatute) {
+      escrow.accountOwner.companyStatute = await this.uploadDocumentQiTech("accountOwner", escrow.accountOwner.companyStatuteAttach, escrow.accountOwner.companyStatuteAttachTypeFile);
     }
 
     this.escrowService.updateAccountOwner(escrow.accountOwner);
-    // uploadDocumentQiTech();
-
-
-    // if (escrow.escrowAccountOwner.type == "PF") {
-    //   docs = await this.getFilesByDocument(escrow.escrowAccountOwner.individualDocumentNumber);
-    // } else if (escrow.escrowAccountOwner.type == "PJ") {
-    //   docs = await this.getFilesByDocument(escrow.escrowAccountOwner.companyDocumentNumber);
-    // }
-
-
-
-    // if (docs) {
-    //   this.uploadDocumentAccountOwner(escrow.escrowAccountOwner, docs);
-    //   this.uploadDocumentAccountManager(escrow.escrowAccountManager, docs);
-    // }
-
 
   }
 
-  // async uploadDocumentAccountOwner(accountOwner, docs) {
-  //   let companyStatuteAttach, proofOfResidenceAttach, documentIdentificationAttach;
-  //   await Promise.all(docs.map(async (element) => {
-  //     // docs.forEach(async element => {
-  //     if (element.name == 'company_statute') {
-  //       companyStatuteAttach = await this.getFileByParentFolderId(element.id);
-  //       if (!accountOwner.companyStatuteAttach) accountOwner.companyStatuteAttach = companyStatuteAttach['DATA'];
-  //       this.escrowService.updateAccountOwner(accountOwner);
-  //     }
-  //     if (element.name == 'proof_of_residence') {
-  //       proofOfResidenceAttach = await this.getFileByParentFolderId(element.id);
-  //       if (!accountOwner.proofOfResidenceAttach) accountOwner.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
-  //       this.escrowService.updateAccountOwner(accountOwner);
-  //     }
-  //     if (element.name == 'document_identification') {
-  //       documentIdentificationAttach = await this.getFileByParentFolderId(element.id);
-  //       if (!accountOwner.documentIdentificationAttach) accountOwner.documentIdentificationAttach = documentIdentificationAttach['DATA'];
-  //       this.escrowService.updateAccountOwner(accountOwner);
-  //     }
-  //   }));
+  async uploadDocumentDebt(debt: DebtEntity) {
+    // let docs;
 
-  // }
+    //buscar scrowAccontOwner
+    console.log("uploadDocumentDebt")
+    debt.borrower.proofOfResidence;
+    debt.borrower.documentIdentification;
+    debt.borrower.weddingCertificate;
 
-  // async uploadDocumentAccountManager(accountManager, docs) {
-  //   let documentIdentificationAttach, proofOfResidenceAttach, companyStatuteAttach, directorsElectionMinute;
-  //   await Promise.all(docs.map(async (element) => {
-  //     if (element.name == 'document_identification') {
-  //       documentIdentificationAttach = this.getFileByParentFolderId(element.id);
-  //       if (!accountManager.documentIdentificationAttach) accountManager.documentIdentificationAttach = documentIdentificationAttach['DATA'];
-  //       this.escrowService.updateAccountManager(accountManager);
-  //     }
-  //     if (element.name == 'proof_of_residence') {
-  //       proofOfResidenceAttach = this.getFileByParentFolderId(element.id);
-  //       if (!accountManager.proofOfResidenceAttach) accountManager.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
-  //       this.escrowService.updateAccountManager(accountManager);
-  //     }
-  //     if (element.name == 'company_statute') {
-  //       companyStatuteAttach = this.getFileByParentFolderId(element.id);
-  //       if (!accountManager.companyStatuteAttach) accountManager.companyStatuteAttach = companyStatuteAttach['DATA'];
-  //       this.escrowService.updateAccountManager(accountManager);
-  //     }
-  //     if (element.name == 'directors_election_minute') {
-  //       directorsElectionMinute = this.getFileByParentFolderId(element.id);
-  //       if (!accountManager.directorsElectionMinute) accountManager.directorsElectionMinute = directorsElectionMinute['DATA'];
-  //       this.escrowService.updateAccountManager(accountManager);
-  //     }
+    if (debt.borrower.proofOfResidence && !debt.borrower.proofOfResidenceAttachNumber) {
+      debt.borrower.proofOfResidenceAttachNumber = await this.uploadDocumentQiTech("debt", debt.borrower.proofOfResidence, debt.borrower.proofOfResidenceAttachTypeFile);
+    }
+    if (debt.borrower.documentIdentification && !debt.borrower.documentIdentificationAttachNumber) {
+      debt.borrower.documentIdentificationAttachNumber = await this.uploadDocumentQiTech("debt", debt.borrower.documentIdentification, debt.borrower.weddingCertificateAttachTypeFile);
+    }
+    if (debt.borrower.weddingCertificate && !debt.borrower.weddingCertificateAttachNumber) {
+      debt.borrower.weddingCertificateAttachNumber = await this.uploadDocumentQiTech("debt", debt.borrower.weddingCertificate, debt.borrower.weddingCertificateAttachTypeFile);
+    }
 
-  //   }));
+    this.debtsService.updateBorrower(debt.borrower);
+
+  }
 
 
-  //   if (accountManager.type == "PJ") {
-  //     //pj
-  //     accountManager.escrowAccountManagerRepresentativeList.forEach(accountManagerRepresentative => {
-  //       this.uploadDocumentAccountManagerRepresentative(accountManagerRepresentative);
-  //     })
-  //   }
-
-  // }
-
-  // async uploadDocumentAccountManagerRepresentative(accountManagerRepresentative) {
-  //   let docs = await this.getFilesByDocument(accountManagerRepresentative.document_identification)
-
-  //   let documentIdentificationAttach, proofOfResidenceAttach;
-  //   if (docs)
-  //     await Promise.all(docs.map(async (element) => {
-  //       if (element.name == 'document_identification') {
-  //         documentIdentificationAttach = await this.getFileByParentFolderId(element.id);
-  //         if (!accountManagerRepresentative.documentIdentificationAttach) accountManagerRepresentative.documentIdentificationAttach = documentIdentificationAttach['DATA'];
-  //         this.escrowService.updateAccountManagerRepresentative(accountManagerRepresentative);
-  //       }
-
-  //       if (element.name == 'proof_of_residence') {
-  //         proofOfResidenceAttach = await this.getFileByParentFolderId(element.id);
-  //         if (!accountManagerRepresentative.proofOfResidenceAttach) accountManagerRepresentative.proofOfResidenceAttach = proofOfResidenceAttach['DATA'];
-  //         this.escrowService.updateAccountManagerRepresentative(accountManagerRepresentative);
-  //       }
-  //     }));
-
-  // }
-
-  async uploadDocumentQiTech(fileId, base64Data) {
+  async uploadDocumentQiTech(fileId, file, typeFile) {
 
     let dt = new Date().getTime();
 
-    fs.writeFileSync( `${this.configService.get('config.FILE_FOLDER')}/${dt}.pdf`, base64Data, {encoding: 'base64'},
-     function (err) {console.log(err);}
-     );
+    fs.writeFileSync(`${this.configService.get('config.FILE_FOLDER')}/${dt}.${typeFile}`, file,
+      function (err) { console.log(err); }
+    );
 
-    const { document_key, document_md5 } = await this.qitechService.upload(`${this.configService.get('config.FILE_FOLDER')}/${dt}.pdf`);
+    const { document_key, document_md5 } = await this.qitechService.upload(`${this.configService.get('config.FILE_FOLDER')}/${dt}.${typeFile}`);
+    console.log("document_key");
     console.log(document_key);
 
     return document_key;
   }
 
-  // async getFilesByDocument(docNumber) {
-  //   let pageToken, id, resp = null;
 
-  //   do {
-  //     resp = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${this.configService.get('config.ROOT_FOLDER_ID')}' in parents`, pageToken);
-  //     if (resp.files) {
-  //       pageToken = resp.nextPageToken;
-  //       id = await resp.files.map(folder => {
-  //         let { name, id } = folder;
-
-  //         let documentNumber = name.split('_')
-  //         documentNumber = documentNumber[0].replace(/[^0-9]+/g, '');
-  //         if (docNumber == documentNumber) {
-  //           return id;
-  //         }
-  //       });
-  //     }
-  //     if (!resp.nextPageToken) break;
-
-  //   } while (id[0] == undefined)
-
-  //   console.log(id);
-  //   if (id[0] != undefined) {
-  //     pageToken = null;
-  //     let data = await this.googleDriveService.getFilesFromDrive(`mimeType='application/vnd.google-apps.folder' and '${id[0]}' in parents`, pageToken);//lista de pastas dentro da pasta do cpf especifico
-  //     if (data) return data.files;
-  //   }
-
-  // }
-
-
-  // async getFileByParentFolderId(folderId) {
-  //   const data = await this.googleDriveService.getFilesFromDrive(`mimeType!='application/vnd.google-apps.folder' and '${folderId}' in parents`, null);//arquivo
-
-  //   if (data.files.length > 0) {
-  //     let { id } = data.files[0];
-
-  //     let response = await this.googleDriveService.downloadFileById(id);
-
-  //     if (response['ID']) {
-  //       response['DATA'] = await this.uploadQiTechAttach(response['ID']);
-  //     }
-  //     return response;
-  //   }
-  // }
-
-  // async uploadQiTechAttach(fileId) {
-  //   const documentKey = await this.uploadDocumentQiTech(`${this.configService.get('config.GOOGLE_DRIVE_FOLDER')}/${fileId}.pdf`);//VERIFICAR SE TODOS OS ARQUIVOS SÃO PDF
-  //   this.deleteFile(fileId);
-  //   console.log('fileId');
-  //   console.log(fileId);
-
-  //   return documentKey;
-  // }
-
-  async deleteFile(fileId) {
+  async deleteFile(fileId, typeFile) {
     const folder = this.configService.get('config.GOOGLE_DRIVE_FOLDER');
 
     fs.stat(`${folder}/${fileId}.pdf`, function (err, stats) {
@@ -574,8 +480,10 @@ export class PontteContractService {
     return await this.pontteRepository.createQueryBuilder("pontteContract")
       .leftJoinAndSelect("pontteContract.escrow", "escrow")
       .leftJoinAndSelect("pontteContract.debt", "debt")
-      .leftJoinAndSelect("escrow.accountManager", "accountManager")
+      // .leftJoinAndSelect("escrow.accountManager", "accountManager")
       .leftJoinAndSelect("escrow.accountOwner", "accountOwner")
+      .leftJoinAndSelect("escrow.destinationAccounts", "destinationAccounts")
+      // .leftJoinAndSelect("accountManager.accountManagerRepresentativeList", "accountManagerRepresentativeList")
 
       .leftJoinAndSelect("pontteContract.debt", "borrower")
       .leftJoinAndSelect("pontteContract.debt", "disbursementAccount")
@@ -591,14 +499,49 @@ export class PontteContractService {
     return await this.pontteRepository.save(contract);
   }
 
-  async teste() {
 
-    const base64String = "JVBERi0xLjcKCjUgMCBvYmoKPDwKL0ZpbHRlciAvRmxhdGVEZWNvZGUKL0xlbmd0aCAxNjgKPj4Kc3RyZWFtCniczZAxDsIwDEV3n6IXwPwkTuqcoHPFEZAoQzsA95dwBtqkFQMbnr7e9/D0wX2EXQcG2nA6diqOswdEuutCD3Kf4hieE7m00jUtlFQ5J8D7Cs81lqgcY85ZjW8/Db7TjUYzOA8X100vAqdyvbmmqOrlm4kIa0mhqGSwWC7fG5/3vGihb1waXLn4X1xEAtuYcL51qfi858EG0NjuUuPKJfyDy0hv5Wp4WQplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKPDwKL0V4dEdTdGF0ZSA8PAovR1MxIDQgMCBSCi9HUzIgNCAwIFIKL0dTMyA0IDAgUgo+Pgo+PgplbmRvYmoKMyAwIG9iago8PAovQ29udGVudHMgWyA1IDAgUiBdCi9Dcm9wQm94IFsgMC4wIDAuMCA1OTUuMzIwMDEgODQxLjkyMDA0IF0KL01lZGlhQm94IFsgMC4wIDAuMCA1OTUuMzIwMDEgODQxLjkyMDA0IF0KL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDYgMCBSCi9Sb3RhdGUgMAovVHlwZSAvUGFnZQo+PgplbmRvYmoKNCAwIG9iago8PAovVHlwZSAvRXh0R1N0YXRlCi9jYSAwLjUKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0NvdW50IDEKL0tpZHMgWyAzIDAgUiBdCi9UeXBlIC9QYWdlcwo+PgplbmRvYmoKMSAwIG9iago8PAovUGFnZXMgMiAwIFIKL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjcgMCBvYmoKPDwKL0F1dGhvciAod2lsbGkpCi9DcmVhdGlvbkRhdGUgKEQ6MjAyMjAxMTkxMTU1NTItMDMnMDAnKQovTW9kRGF0ZSAoRDoyMDIyMDExOTExNTU1Mi0wMycwMCcpCi9Qcm9kdWNlciAoTWljcm9zb2Z0OiBQcmludCBUbyBQREYpCi9UaXRsZSAoTWFpbiBSZXBvcnQpCj4+CmVuZG9iagp4cmVmCjAgOA0KMDAwMDAwMDAwMCA2NTUzNSBmDQowMDAwMDAwNjAyIDAwMDAwIG4NCjAwMDAwMDA1NDMgMDAwMDAgbg0KMDAwMDAwMDMyMCAwMDAwMCBuDQowMDAwMDAwNDk3IDAwMDAwIG4NCjAwMDAwMDAwMDkgMDAwMDAgbg0KMDAwMDAwMDI0OSAwMDAwMCBuDQowMDAwMDAwNjUxIDAwMDAwIG4NCnRyYWlsZXIKPDwKL0luZm8gNyAwIFIKL1Jvb3QgMSAwIFIKL1NpemUgOAo+PgpzdGFydHhyZWYKODIxCiUlRU9GCg==";
+  async saveEscrowAccountManager(accontManagerDto: EscrowAccountManagerDto) {
+    let accountManager = new EscrowAccountManager();
+    // let accountManager = new EscrowAccountManager();
+    Object.assign(accountManager, accontManagerDto);
+    //upload documentos
+    accountManager = await this.escrowService.documentsAccountManager(accountManager, accontManagerDto);
 
-    var bytes = base64.decode(base64String);
+    accountManager = await this.escrowService.saveEscrowAccountManager(accountManager);
 
-    console.log(bytes)
+    await this.uploadDocumentsAccountManager(accountManager);
   }
+
+
+  async uploadDocumentsAccountManager(accountManager: EscrowAccountManager,) {
+
+    accountManager.accountManagerRepresentativeList.forEach(async element => {
+      if (element.proofOfResidenceAttach) {
+        element.proofOfResidenceAttachNumber = await this.uploadDocumentQiTech("accountManager", element.proofOfResidenceAttach, element.proofOfResidenceAttachTypeFile);
+      }
+      if (element.documentIdentificationAttach) {
+        element.documentIdentificationAttachNumber = await this.uploadDocumentQiTech("accountManager", element.documentIdentificationAttach, element.documentIdentificationAttachTypeFile);
+      }
+
+    });
+
+    if (accountManager.documentIdentificationAttach) {
+      accountManager.documentIdentificationAttachNumber = await this.uploadDocumentQiTech("accountManager", accountManager.documentIdentificationAttach, accountManager.documentIdentificationAttachTypeFile);
+    }
+    if (accountManager.directorsElectionMinuteAttach) {
+      accountManager.directorsElectionMinuteAttachNumber = await this.uploadDocumentQiTech("accountManager", accountManager.directorsElectionMinuteAttach, accountManager.directorsElectionMinuteAttachTypeFile);
+    }
+    if (accountManager.proofOfResidenceAttach) {
+      accountManager.proofOfResidenceAttachNumber = await this.uploadDocumentQiTech("accountManager", accountManager.proofOfResidenceAttach, accountManager.proofOfResidenceAttachTypeFile);
+    }
+    if (accountManager.companyStatuteAttach) {
+      accountManager.companyStatuteAttachNumber = await this.uploadDocumentQiTech("accountManager", accountManager.companyStatuteAttach, accountManager.companyStatuteAttachTypeFile);
+    }
+
+
+    this.escrowService.updateAccountManager(accountManager);
+  }
+
 
 
 }

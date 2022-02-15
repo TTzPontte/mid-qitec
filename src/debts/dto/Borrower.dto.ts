@@ -1,4 +1,5 @@
 import { DebtDto } from "./debt.dto";
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class BorrowerDto {
   id: number;
@@ -14,7 +15,7 @@ export class BorrowerDto {
   phone: string | null;
   tradingName: string | null;
   motherName: string | null;
-  birthDate: string | null;
+  birthDate: Date | null;
   profession: string | null;
   nationality: string | null;
   maritalStatus: string | null;
@@ -27,16 +28,27 @@ export class BorrowerDto {
   documentIdentification: string | null;
   proofOfResidence: string | null;
   // debt: DebtDto;
+  @IsNotEmpty()
   addressCity: string | null;
+  @IsNotEmpty()
   addressComplement: string | null;
+  @IsNotEmpty()
   addressNeighborhood: string | null;
+  @IsNotEmpty()
   addressNumber: string | null;
-  addressPostal_code: string | null;
+  @IsNotEmpty()
+  addressPostalCode: string | null;
+  @IsNotEmpty()
   addressState: string | null;
+  @IsNotEmpty()
   addressStreet: string | null;
+  @IsNotEmpty()
   addressCountry: string | null;
 
   documentIdentificationAttachBase64: string | null;
   proofOfResidenceAttachBase64: string | null;
   companyStatuteAttachBase64: string | null;
+
+  proofOfResidenceAttachTypeFile: string;
+  documentIdentificationAttachTypeFile: string;
 }
