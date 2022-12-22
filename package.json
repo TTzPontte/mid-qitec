@@ -31,7 +31,7 @@
     "crypto-js": "^4.1.1",
     "dateformat": "^4.5.1",
     "fs": "0.0.1-security",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mysql2": "^2.3.0",
     "qitech-wrapper": "^0.1.8",
     "reflect-metadata": "^0.1.13",
